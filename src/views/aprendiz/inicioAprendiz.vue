@@ -1,14 +1,15 @@
 <template>
   <div class="center">
     <div class="grid">
-      <Card
-        title="Datos Personales"
-        subtitle="Visualización de datos y cambios "
-        imgSrc="/src/assets/Almacenamiento.jpg"
-        route="/vista"
-        color="#5db82f"
-        textColor="white"
-      />
+     <Card
+  title="Datos Personales"
+  subtitle="Visualización de datos y cambios "
+  imgSrc="/src/assets/Almacenamiento.jpg"
+  route="/aprendiz/datospersonales"
+  color="#5db82f"
+  textColor="white"
+/>
+
       <Card
         title="Bitacoras y Documentos"
         subtitle="Consulta, Registro y Visualización"

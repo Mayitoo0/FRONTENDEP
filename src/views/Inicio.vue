@@ -2,13 +2,13 @@
   <div class="center">
     <div class="grid">
       <Card v-if="role === 'ETAPA PRODUCTIVA VIRTUAL' || 'ETAPA PRODUCTIVA PRESENCIAL' " title="SGVA"
-        subtitle="Consulta, Registro y Visualización de empresas" imgSrc="/src/assets/Monitoria.jpg" route="/vista"
+        subtitle="Consulta, Registro y Visualización de empresas" imgSrc="/src/assets/Monitoria.jpg" route="admin/empresas"
         color="#5db82f" textColor="white" />
       <Card v-if="role === 'ETAPA PRODUCTIVA VIRTAL' || 'ETAPA PRODUCTIVA PRESENCIAL'" title="Vista de Documentos"
         subtitle="Consulta y Visualización" imgSrc="/src/assets/Almacenamiento.jpg" route="/vista" color="#5db82f"
         textColor="white" />
       <Card v-if="role === 'ETAPA PRODUCTIVA VIRTAL' || 'ETAPA PRODUCTIVA PRESENCIAL'" title="Instructores"
-        subtitle="Consulta Instructores" imgSrc="/src/assets/Pasantia_ONG.jpg" route="/vista" color="#5db82f"
+        subtitle="Consulta Instructores" imgSrc="/src/assets/Pasantia_ONG.jpg" route="admin/instructores" color="#5db82f"
         textColor="white" />
       <Card v-if="role === 'ETAPA PRODUCTIVA VIRTAL' || 'ETAPA PRODUCTIVA PRESENCIAL'" title="Aprendices"
         subtitle="Consulta y Visualización" imgSrc="/src/assets/pyme.jpg" route="/vista" color="#5db82f"
@@ -19,6 +19,7 @@
       <Card v-if="role === 'ETAPA PRODUCTIVA VIRTAL' || 'ETAPA PRODUCTIVA PRESENCIAL'" title="Reportes"
         subtitle="Consulta y Visualización de Reportes" imgSrc="/src/assets/pyme.jpg" route="/vista" color="#5db82f"
         textColor="white" />
+
       <Card v-if="role === 'INSTRUCTOR'" title="Informe Personal" subtitle="Consultar mi informacion y Horas"
         imgSrc="/src/assets/Monitoria.jpg" route="/vista" color="#5db82f" textColor="white" />
       <Card v-if="role === 'INSTRUCTOR'" title="Seguimientos" subtitle="Proceso de documentos de seguimiento"
@@ -31,7 +32,8 @@
         imgSrc="/src/assets/Pasantia_ONG.jpg" route="/vista" color="#5db82f" textColor="white" />
       <Card v-if="role === 'INSTRUCTOR'" title="Novedades" subtitle="Procesos Disciplinarios"
         imgSrc="/src/assets/pyme.jpg" route="/vista" color="#5db82f" textColor="white" />
-    </div>
+
+       </div>
   </div>
 </template>
 <script setup>
