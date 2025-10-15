@@ -38,7 +38,7 @@
         title="Parametros" 
         subtitle="Consulta Parametros" 
         imgSrc="/src/assets/Pasantia_ONG.jpg" 
-        route="/vista"
+        route="/app/admin/parametros"
         color="#5db82f" 
         textColor="white" />
       <Card
@@ -105,11 +105,13 @@
         color="#5db82f" 
         textColor="white" />
 
+      
     </div>
   </div>
 </template>
 <script setup>
 import Card from '../components/cards/MenuCard.vue';
+
 import { ref, onMounted } from 'vue'
 
 const role = ref('')
@@ -141,7 +143,5 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   max-width: 100vw;
-  max-height: calc(100vh - 180px);
-  overflow-y: auto;
 }
 </style>

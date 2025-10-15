@@ -66,7 +66,6 @@ const routes = [
       { path:  'admin/horasporinstructor', name: 'AdminHorasPorInstructor', component: AdminHorasPorInstructor},
       { path:  'admin/reporteporaño', name: 'AdminReportePorAño', component: AdminReportePorAño},
       { path:  'admin/reporteporempresa', name: 'AdminReportePorEmpresa', component: AdminReportePorEmpresa},
-      { path:  'admin/reporteporempresa', name: 'AdminReportePorEmpresa', component: AdminReportePorEmpresa},
       { path:  'admin/reportepormodalidad', name: 'AdminReportePorModalidad', component: AdminReportePorModalidad},
       { path:  'instructor/bitacoras', name: 'InstructorBitacoras', component: InstructorBitacoras},
       { path:  'instructor/historial', name: 'InstructorHistorial', component: InstructorHistorial},

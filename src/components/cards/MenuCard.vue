@@ -30,7 +30,7 @@ defineProps({
   },
   subtitle: {
     type: String,
-    default: 'Subtítulo de la Card'
+    default: ''
   },
   imgSrc: {
     type: String,
