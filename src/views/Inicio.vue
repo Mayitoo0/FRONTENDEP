@@ -50,6 +50,14 @@
         color="#5db82f" 
         textColor="white" />
 
+         <Card 
+         v-if="role === 'ETAPA PRODUCTIVA VIRTUAL' ||  role === 'ETAPA PRODUCTIVA PRESENCIAL' || role === 'ADMINISTRADOR'" 
+         title="Novedades Admin"
+        subtitle="Consulta y Visualización de Novedades" 
+        imgSrc="/src/assets/pyme.jpg" 
+        route="admin/novedadesAdmin" 
+        color="#5db82f"
+        textColor="white" />
       <!-- INSTRUCTORES -->
       
       <Card 
