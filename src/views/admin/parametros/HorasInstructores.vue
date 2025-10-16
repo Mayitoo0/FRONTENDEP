@@ -78,8 +78,8 @@ const columns = [
 
 const getParametersHoursInstructor = async () => {
   try {
-    const res = await getData("/parameters/listParameters")
-    rows.value = res
+    const res = await getData("/parameters/filterParameters")
+    rows.value = res.data
   } catch (error) {
     console.log(error);
   }

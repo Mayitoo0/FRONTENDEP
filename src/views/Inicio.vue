@@ -113,7 +113,15 @@
         color="#5db82f" 
         textColor="white" />
 
-      
+       <Card 
+        v-if="role[0] === 'OWNER'" 
+        title="Novedades" 
+        subtitle="Procesos Disciplinarios"
+        imgSrc="/src/assets/pyme.jpg" 
+        route="/vista" 
+        color="#5db82f" 
+        textColor="white" />
+
     </div>
   </div>
 </template>

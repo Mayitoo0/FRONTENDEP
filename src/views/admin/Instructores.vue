@@ -1,8 +1,5 @@
 <template>
   <div class="instructores-container">
-    <div class="back-button-container">
-      <BackButton />
-    </div>
     <div class="header-container">
       <header class="text-h2 text-weight-bold text-center">INSTRUCTORES</header>
     </div>
@@ -28,9 +25,6 @@
 
         <q-select v-model="filtroPrograma" :options="opcionesPrograma" label="Programa" outlined dense clearable
           class="filter-select" emit-value map-options />
-
-        <Button1 label="Nuevo Instructor" icon="add" color="#39A900" class="button-nuevo boton-alargado"
-          @click="showNuevoInstructorDialog = true" />
       </div>
 
       <q-table :rows="instructoresFiltrados" :columns="columns" row-key="id" :loading="loading" flat bordered
@@ -45,12 +39,8 @@
 
         <template v-slot:body-cell-acciones="props">
           <q-td :props="props">
-            <q-btn flat round color="primary" icon="visibility" size="sm" @click="verDetalle(props.row)"
-              class="q-mr-xs">
+            <q-btn flat round color="primary" icon="visibility" size="sm" @click="verDetalle(props.row)">
               <q-tooltip>Ver detalles</q-tooltip>
-            </q-btn>
-            <q-btn flat round color="warning" icon="edit" size="sm" @click="abrirModalEditar(props.row)">
-              <q-tooltip>Editar</q-tooltip>
             </q-btn>
           </q-td>
         </template>
@@ -187,8 +177,6 @@
           <q-separator />
           <div class="dialog-buttons q-pa-md">
             <div class="row justify-end buttons-row">
-              <Button1 label="Editar" color="primary" icon="edit" style="width: 150px"
-                @click="abrirModalEditar(instructorSeleccionado)" />
               <Button1 label="Cerrar" color="grey-7" icon="close" style="width: 150px"
                 @click="mostrarDetalles = false" />
             </div>
@@ -196,36 +184,6 @@
         </q-card>
       </q-dialog>
     </div>
-
-    <ModalNuevoInst
-      v-model="showNuevoInstructorDialog" 
-      :instructor="nuevoInstructor"
-      titulo="Nuevo Instructor"
-      @accept="mostrarConfirmacionNuevo"
-      @cancel="cancelarNuevo" 
-    />
-
-    <ModalNuevoInst
-      v-model="showEditarInstructorDialog" 
-      :instructor="instructorAEditar"
-      titulo="Editar Instructor"
-      @accept="mostrarConfirmacionEditar"
-      @cancel="cancelarEditar" 
-    />
-
-    <ConfirmChangesModal
-      v-model="showConfirmacionNuevoDialog" 
-      :changes="cambiosDetectadosNuevo"
-      @confirm="guardarNuevoInstructor"
-      @cancel="showConfirmacionNuevoDialog = false" 
-    />
-
-    <ConfirmChangesModal
-      v-model="showConfirmacionEditarDialog" 
-      :changes="cambiosDetectadosEditar"
-      @confirm="guardarEdicionInstructor"
-      @cancel="showConfirmacionEditarDialog = false" 
-    />
   </div>
 </template>
 
@@ -236,8 +194,6 @@ import { apiClient } from '@/plugins/pluginAxios.js'
 import BackButton from '@/components/BackButton.vue'
 import StatsCard from '@/components/cards/StatsCard.vue'
 import Button1 from '@/components/button-1.vue'
-import ConfirmChangesModal from 'src/components/modals/ConfirmChangesModal.vue'
-import ModalNuevoInst from 'src/components/modals/ModalNuevoInst.vue'
 
 const $q = useQuasar()
 
@@ -259,33 +215,6 @@ const mostrarTabla = ref(false)
 const search = ref('')
 const mostrarDetalles = ref(false)
 const instructorSeleccionado = ref(null)
-
-const showNuevoInstructorDialog = ref(false)
-const showConfirmacionNuevoDialog = ref(false)
-const cambiosDetectadosNuevo = ref([])
-
-const nuevoInstructor = ref({
-  cedula: '',
-  nombres: '',
-  apellidos: '',
-  telefono: '',
-  email: '',
-  direccion: ''
-})
-
-const showEditarInstructorDialog = ref(false)
-const showConfirmacionEditarDialog = ref(false)
-const cambiosDetectadosEditar = ref([])
-const instructorOriginal = ref(null)
-
-const instructorAEditar = ref({
-  cedula: '',
-  nombres: '',
-  apellidos: '',
-  telefono: '',
-  email: '',
-  direccion: ''
-})
 
 const opcionesEstado = ref([])
 const opcionesPrograma = ref([])
@@ -326,21 +255,24 @@ const instructoresFiltrados = computed(() => {
   return resultado
 })
 
-async function fetchStats() {
+async function fetchInstructor() {
   loading.value = true
   try {
-    const [instructoresResponse, aprendicesResponse] = await Promise.all([
-      apiClient.get('/instructor/listInstructor'),
-      apiClient.get('/apprentice/listApprentice')
-    ])
+    const response = await apiClient.get('/instructors/listInstructor')
+    const msg = response.data?.msg
+    console.log(response);
 
-    const instructoresArray = instructoresResponse.data.msg || []
-    const aprendicesArray = aprendicesResponse.data.msg || []
-    aprendices.value = aprendicesArray
+    // Compatibilidad: msg puede ser un array directo o un objeto con propiedades
+    const instructoresArray = Array.isArray(msg)
+      ? msg
+      : (msg?.instructores || msg?.instructors || msg?.list || [])
 
+    const aprendicesArray = msg?.aprendices || msg?.apprentices || []
+
+    // Mapear respuesta a la estructura usada en la vista
     instructores.value = instructoresArray.map(instructor => ({
       id: instructor._id,
-      nombre: instructor.name,
+      nombre: instructor.name || `${instructor.nombres || ''} ${instructor.apellidos || ''}`.trim(),
       tipoDocumento: instructor.tpdocument,
       numeroDocumento: instructor.numdocument,
       emailPersonal: instructor.emailpersonal,
@@ -352,28 +284,31 @@ async function fetchStats() {
       tipoVinculacion: instructor.bindingtype || 'No especificado',
       capacidadHoras: instructor.caphour || 0,
       horasTrabajadas: instructor.hourswork || 0,
-      aprendices: 0,
+      aprendices: instructor.aprendicesCount ?? 0,
       status: instructor.status,
-      fechaCreacion: new Date(instructor.createdAt).toLocaleDateString(),
-      fechaActualizacion: new Date(instructor.updatedAt).toLocaleDateString()
+      fechaCreacion: instructor.createdAt ? new Date(instructor.createdAt).toLocaleDateString() : '-',
+      fechaActualizacion: instructor.updatedAt ? new Date(instructor.updatedAt).toLocaleDateString() : '-'
     }))
+
+    // Guardar aprendices (si es necesario en otras partes)
+    aprendices.value = Array.isArray(aprendicesArray) ? aprendicesArray : []
 
     generarOpcionesFiltro()
 
     const activos = instructores.value.filter(i => i.status === 1).length
     const contratoTerminado = instructores.value.filter(i =>
-      i.tipoVinculacion.toLowerCase().includes('contrato terminado')
+      (i.tipoVinculacion || '').toLowerCase().includes('contrato terminado')
     ).length
 
     stats.value = [
       { title: 'TOTAL INSTRUCTORES', value: instructores.value.length },
       { title: 'INSTRUCTORES ACTIVOS', value: activos },
-      { title: 'APRENDICES ASIGNADOS', value: aprendicesArray.length },
+      { title: 'APRENDICES ASIGNADOS', value: aprendices.value.length },
       { title: 'INSTRUCTORES CONTRATO TERMINADO', value: contratoTerminado }
     ]
   } catch (err) {
     console.error('Error al cargar instructores:', err)
-    error.value = 'Error al cargar instructores'
+    error.value = err.response?.data?.msg || err.message || 'Error al cargar instructores'
   } finally {
     loading.value = false
   }
@@ -413,206 +348,8 @@ function verDetalle(instructor) {
   mostrarDetalles.value = true
 }
 
-const limpiarFormularioNuevo = () => {
-  nuevoInstructor.value = {
-    cedula: '',
-    nombres: '',
-    apellidos: '',
-    telefono: '',
-    email: '',
-    direccion: ''
-  }
-}
-
-const cancelarNuevo = () => {
-  limpiarFormularioNuevo()
-  showNuevoInstructorDialog.value = false
-}
-
-const mostrarConfirmacionNuevo = () => {
-  const campos = [
-    { key: 'cedula', label: 'Cédula' },
-    { key: 'apellidos', label: 'Apellidos' },
-    { key: 'nombres', label: 'Nombres' },
-    { key: 'telefono', label: 'Teléfono' },
-    { key: 'email', label: 'Email' },
-    { key: 'direccion', label: 'Dirección' }
-  ]
-
-  for (const campo of campos) {
-    const valor = nuevoInstructor.value[campo.key]
-    if (!valor || !valor.trim()) {
-      $q.notify({
-        type: 'negative',
-        message: `Por favor ingrese ${campo.label.toLowerCase()}`,
-        position: 'top',
-        timeout: 2000
-      })
-      return
-    }
-  }
-
-  cambiosDetectadosNuevo.value = campos.map((campo) => ({
-    label: campo.label,
-    old: '-',
-    new: nuevoInstructor.value[campo.key]
-  }))
-
-  showNuevoInstructorDialog.value = false
-  showConfirmacionNuevoDialog.value = true
-}
-
-const guardarNuevoInstructor = () => {
-  const nombreCompleto = `${nuevoInstructor.value.nombres} ${nuevoInstructor.value.apellidos}`
-
-  instructores.value.unshift({
-    id: Date.now().toString(),
-    nombre: nombreCompleto,
-    numeroDocumento: nuevoInstructor.value.cedula,
-    email: nuevoInstructor.value.email,
-    telefono: nuevoInstructor.value.telefono,
-    direccion: nuevoInstructor.value.direccion, 
-    status: 1,
-    fechaCreacion: new Date().toLocaleDateString(),
-    fechaActualizacion: new Date().toLocaleDateString()
-  })
-
-  $q.notify({
-    type: 'positive',
-    message: 'Instructor guardado exitosamente',
-    position: 'top',
-    timeout: 2000
-  })
-
-  limpiarFormularioNuevo()
-  showConfirmacionNuevoDialog.value = false
-}
-
-const abrirModalEditar = (instructor) => {
-  mostrarDetalles.value = false
-  instructorOriginal.value = instructor
-
-  const nombrePartes = instructor.nombre.split(' ')
-  const nombres = nombrePartes.slice(0, Math.ceil(nombrePartes.length / 2)).join(' ')
-  const apellidos = nombrePartes.slice(Math.ceil(nombrePartes.length / 2)).join(' ')
-
-  instructorAEditar.value = {
-    cedula: instructor.numeroDocumento?.toString() || '',
-    nombres,
-    apellidos,
-    telefono: instructor.telefono || '',
-    email: instructor.email || '',
-    direccion: instructor.direccion || '' 
-  }
-
-  showEditarInstructorDialog.value = true
-}
-
-const cancelarEditar = () => {
-  instructorAEditar.value = {
-    cedula: '',
-    nombres: '',
-    apellidos: '',
-    telefono: '',
-    email: '',
-    direccion: ''
-  }
-  instructorOriginal.value = null
-  showEditarInstructorDialog.value = false
-}
-
-const mostrarConfirmacionEditar = () => {
-  const campos = [
-    { key: 'cedula', label: 'Cédula' },
-    { key: 'nombres', label: 'Nombres' },
-    { key: 'apellidos', label: 'Apellidos' },
-    { key: 'telefono', label: 'Teléfono' },
-    { key: 'email', label: 'Email' },
-    { key: 'direccion', label: 'Dirección' }
-  ]
-
-  for (const campo of campos) {
-    const valor = instructorAEditar.value[campo.key]
-    if (!valor || !valor.trim()) {
-      $q.notify({
-        type: 'negative',
-        message: `El campo ${campo.label} es obligatorio`,
-        position: 'top',
-        timeout: 2000,
-        icon: 'error'
-      })
-      return
-    }
-  }
-
-  const nombreOriginalPartes = instructorOriginal.value.nombre.split(' ')
-  const nombresOriginal = nombreOriginalPartes.slice(0, Math.ceil(nombreOriginalPartes.length / 2)).join(' ')
-  const apellidosOriginal = nombreOriginalPartes.slice(Math.ceil(nombreOriginalPartes.length / 2)).join(' ')
-
-  const cedulaOriginal = instructorOriginal.value.numeroDocumento?.toString() || ''
-  const telefonoOriginal = instructorOriginal.value.telefono || ''
-  const emailOriginal = instructorOriginal.value.email || ''
-  const direccionOriginal = instructorOriginal.value.direccion || ''
-
-  const hayCambios =
-    instructorAEditar.value.cedula.trim() !== cedulaOriginal.trim() ||
-    instructorAEditar.value.nombres.trim() !== nombresOriginal.trim() ||
-    instructorAEditar.value.apellidos.trim() !== apellidosOriginal.trim() ||
-    instructorAEditar.value.telefono.trim() !== telefonoOriginal.trim() ||
-    instructorAEditar.value.email.trim() !== emailOriginal.trim() ||
-    instructorAEditar.value.direccion.trim() !== direccionOriginal.trim()
-
-  if (!hayCambios) {
-    $q.notify({
-      type: 'negative',
-      message: 'Actualice los datos para continuar',
-      position: 'top',
-      timeout: 2500,
-      icon: 'error'
-    })
-    return
-  }
-
-  cambiosDetectadosEditar.value = campos.map((campo) => ({
-    label: campo.label,
-    old: instructorOriginal.value[campo.key] || '-',
-    new: instructorAEditar.value[campo.key]
-  }))
-
-  showEditarInstructorDialog.value = false
-  showConfirmacionEditarDialog.value = true
-}
-
-const guardarEdicionInstructor = () => {
-  const nombreCompleto = `${instructorAEditar.value.nombres} ${instructorAEditar.value.apellidos}`
-  const index = instructores.value.findIndex(i => i.id === instructorOriginal.value.id)
-
-  if (index !== -1) {
-    instructores.value[index] = {
-      ...instructores.value[index],
-      nombre: nombreCompleto,
-      numeroDocumento: instructorAEditar.value.cedula,
-      email: instructorAEditar.value.email,
-      telefono: instructorAEditar.value.telefono,
-      direccion: instructorAEditar.value.direccion, 
-      fechaActualizacion: new Date().toLocaleDateString()
-    }
-  }
-
-  $q.notify({
-    type: 'positive',
-    message: 'Instructor actualizado exitosamente',
-    position: 'top',
-    timeout: 2000
-  })
-
-  cancelarEditar()
-  showConfirmacionEditarDialog.value = false
-}
-
-onMounted(fetchStats)
+onMounted(fetchInstructor)
 </script>
-
 
 <style scoped>
 .urgent-section {
