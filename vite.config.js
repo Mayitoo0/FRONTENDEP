@@ -19,6 +19,7 @@ export default defineConfig({
     }
   },
   server: {
-    open: true
+    open: true,
+    allowedHosts: ['frontendep-f3f3.onrender.com'] 
   }
 })
