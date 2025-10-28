@@ -13,7 +13,7 @@
         title="Bitacoras y Documentos"
         subtitle="Consulta, Registro y Visualización"
         imgSrc="/src/assets/Almacenamiento.jpg"
-        route="/vista"
+        route="bitacoras"
         color="#5db82f"
         textColor="white"
       />
@@ -21,7 +21,7 @@
         title="Etapa Productiva"
         subtitle="Registro de Etapa Productiva"
         imgSrc="/src/assets/Almacenamiento.jpg"
-        route="/vista"
+        route="registroep"
         color="#5db82f"
         textColor="white"
       />
@@ -29,7 +29,7 @@
         title="Proceso de EP"
         subtitle="Visualización del Proceso de EP"
         imgSrc="/src/assets/Almacenamiento.jpg"
-        route="/vista"
+        route="procesoep"
         color="#5db82f"
         textColor="white"
       />

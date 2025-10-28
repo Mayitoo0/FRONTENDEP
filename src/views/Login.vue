@@ -78,7 +78,7 @@
 
             <div class="row items-center q-mb-sm">
               <q-icon name="vpn_key" size="20px" class="q-mr-xs" />
-              <a href="#" class="text-caption text-grey-7">Recuperar contraseña</a>
+              <a @click="irRecuperarContrasena" class="text-caption text-grey-7 cursor-pointer">Recuperar contraseña</a>
             </div>
 
             <!-- Botón de ingreso -->
@@ -142,6 +142,9 @@ const form = ref({
   contrasena: ''
 })
 
+function irRecuperarContrasena() {
+  router.push('/CambiarContrasena')
+}
 
 const onSubmit = async () => {
   loading.value = true
@@ -286,5 +289,13 @@ const onSubmit = async () => {
 
 .flex.flex-center {
   min-height: auto !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-pointer:hover {
+  text-decoration: underline;
 }
 </style>

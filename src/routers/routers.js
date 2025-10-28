@@ -33,7 +33,7 @@ import Bitacoras from '../views/aprendiz/Bitacoras.vue'
 import DatosPersonales from '../views/aprendiz/DatosPersonales.vue'
 import MisRegistros from '../views/aprendiz/MisRegistros.vue'
 import ProcesoEP from '../views/aprendiz/ProcesoEP.vue'
-import ContratoDeApremdzaje from '../views/aprendiz/modalidadesEP/ContratoDeApremdzaje.vue'
+import ContratoAprendizaje from '../views/aprendiz/modalidadesEP/ContratoAprendizaje.vue'
 import MonitoriaSENA from '../views/aprendiz/modalidadesEP/MonitoriaSENA.vue'
 import PasantiaONGEntidad from '../views/aprendiz/modalidadesEP/PasantiaONGEntidad.vue'
 import PasantiaPyME from '../views/aprendiz/modalidadesEP/PasantiaPyME.vue'
@@ -41,51 +41,58 @@ import PasantiaUPFamiliar from '../views/aprendiz/modalidadesEP/PasantiaUPFamili
 import ProyectoProductiva from '../views/aprendiz/modalidadesEP/ProyectoProductiva.vue'
 import VinculoLaboralContractual from '../views/aprendiz/modalidadesEP/VinculoLaboralContractual.vue'
 import novedadesAdmin from "../views/admin/novedadesAdmin.vue"
+import CambiarContrasena from "../views/aprendiz/CambiarContrasena.vue"
+import IngresarCodigoContrasena from "../views/aprendiz/IngresarCodigoContrasena.vue"
+import NuevaContrasena from "../views/aprendiz/NuevaContrasena.vue"
 
 const routes = [
   { path: "/", component: Login },
+  { path: "/CambiarContrasena", name: "CambiarContrasena", component: CambiarContrasena },
+  { path: "/IngresarCodigoContrasena", name: "IngresarCodigoContrasena", component: IngresarCodigoContrasena },
+  { path: "/NuevaContrasena", name: "NuevaContrasena", component: NuevaContrasena },
   {
     path: "/app", component: MainLayout, children: [
       { path: "inicio", name: "Inicio", component: Inicio },
       { path: "aprendiz/inicio", name: "Aprendiz", component: InicioAprendiz },
       { path: 'aprendiz/registros', name: 'AprendizMisRegistros', component: RegistroEP },
-      { path:  'admin/empresas', name: 'AdminEmpresas', component: AdminEmpresas },
-      { path:  'admin/instructores', name: 'AdminInstructores', component: Instructores },
-      { path:  'admin/aprendices', name: 'AdminAprendices', component: AdminAprendices },
-      { path:  'admin/documentos', name: 'AdminDocumentos', component: AdminDocumentos },
-      { path:  'admin/fichas', name: 'AdminFichas', component: AdminFichas },
-      { path:  'admin/modalidades', name: 'AdminModalidades', component: AdminModalidades },
-      { path:  'admin/parametros', name: 'AdminParametros', component: AdminParametros },
-      { path:  'admin/reportes', name: 'AdminReportes ', component: AdminReportes  },
-      { path:  'admin/validarsolicitudes', name: 'AdminValidarSolicitudes ', component: AdminValidarSolicitudes},
-      { path:  'admin/alertas', name: 'AdminAlertas', component: AdminAlertas},
-      { path:  'admin/almacenamiento', name: 'AdminAlmacenamiento', component: AdminAlmacenamiento},
-      { path:  'admin/horasintructores', name: 'AdminHorasIntructores', component: AdminHorasIntructores},
-      { path:  'admin/paramaterosmodalidades', name: 'AdminParamaterosModalidades', component: AdminParamaterosModalidades},
-      { path:  'admin/procesoformativo', name: 'AdminProcesoFormativo', component: AdminProcesoFormativo},
-      { path:  'admin/seguridad', name: 'AdminSeguridad', component: AdminSeguridad},
-      { path:  'admin/horasporinstructor', name: 'AdminHorasPorInstructor', component: AdminHorasPorInstructor},
-      { path:  'admin/reporteporaño', name: 'AdminReportePorAño', component: AdminReportePorAño},
-      { path:  'admin/reporteporempresa', name: 'AdminReportePorEmpresa', component: AdminReportePorEmpresa},
-      { path:  'admin/reportepormodalidad', name: 'AdminReportePorModalidad', component: AdminReportePorModalidad},
-      { path:  'instructor/bitacoras', name: 'InstructorBitacoras', component: InstructorBitacoras},
-      { path:  'instructor/historial', name: 'InstructorHistorial', component: InstructorHistorial},
-      { path:  'instructor/informepersonal', name: 'InstructorInformePersonal', component: InstructorInformePersonal},
-      { path:  'instructor/misaprendices', name: 'InstructorMisAprendices', component: InstructorMisAprendices},
-      { path:  'instructor/novedades', name: 'InstructorNovedades', component: InstructorNovedades},
-      { path:  'instructor/seguimientos', name: 'InstructorSeguimientos', component: InstructorSeguimientos},
-      { path:  'aprendiz/bitacoras', name: 'Bitacoras', component: Bitacoras },
-      { path:  'aprendiz/datospersonales', name: 'DatosPersonales', component: DatosPersonales },
-      { path:  'aprendiz/misregistros', name: 'MisRegistros', component: MisRegistros },
-      { path:  'aprendiz/procesoep', name: 'ProcesoEP', component: ProcesoEP },
-      { path:  'aprendiz/modalidadesEP/contratodeapremdzaje', name: 'ContratoDeApremdzaje', component: ContratoDeApremdzaje },
-      { path:  'aprendiz/modalidadesEP/monitoriasena', name: 'MonitoriaSENA', component: MonitoriaSENA },
-      { path:  'aprendiz/modalidadesEP/pasantiaongentidad', name: 'PasantiaONGEntidad', component: PasantiaONGEntidad },
-      { path:  'aprendiz/modalidadesEP/pasantiapyme', name: 'PasantiaPyME', component: PasantiaPyME },
-      { path:  'aprendiz/modalidadesEP/pasantiaupfamiliar', name: 'PasantiaUPFamiliar', component: PasantiaUPFamiliar },
-      { path:  'aprendiz/modalidadesEP/proyectoproductiva', name: 'ProyectoProductiva', component: ProyectoProductiva },
-      { path:  'aprendiz/modalidadesEP/vinculolaboralcontractual', name: 'VinculoLaboralContractual', component: VinculoLaboralContractual },
-      { path:  'admin/novedadesAdmin', name: 'novedadesAdmin', component: novedadesAdmin }
+      { path: 'admin/empresas', name: 'AdminEmpresas', component: AdminEmpresas },
+      { path: 'admin/instructores', name: 'AdminInstructores', component: Instructores },
+      { path: 'admin/aprendices', name: 'AdminAprendices', component: AdminAprendices },
+      { path: 'admin/documentos', name: 'AdminDocumentos', component: AdminDocumentos },
+      { path: 'admin/fichas', name: 'AdminFichas', component: AdminFichas },
+      { path: 'admin/modalidades', name: 'AdminModalidades', component: AdminModalidades },
+      { path: 'admin/parametros', name: 'AdminParametros', component: AdminParametros },
+      { path: 'admin/reportes', name: 'AdminReportes ', component: AdminReportes },
+      { path: 'admin/validarsolicitudes', name: 'AdminValidarSolicitudes ', component: AdminValidarSolicitudes },
+      { path: 'admin/alertas', name: 'AdminAlertas', component: AdminAlertas },
+      { path: 'admin/almacenamiento', name: 'AdminAlmacenamiento', component: AdminAlmacenamiento },
+      { path: 'admin/horasintructores', name: 'AdminHorasIntructores', component: AdminHorasIntructores },
+      { path: 'admin/paramaterosmodalidades', name: 'AdminParamaterosModalidades', component: AdminParamaterosModalidades },
+      { path: 'admin/procesoformativo', name: 'AdminProcesoFormativo', component: AdminProcesoFormativo },
+      { path: 'admin/seguridad', name: 'AdminSeguridad', component: AdminSeguridad },
+      { path: 'admin/horasporinstructor', name: 'AdminHorasPorInstructor', component: AdminHorasPorInstructor },
+      { path: 'admin/reporteporaño', name: 'AdminReportePorAño', component: AdminReportePorAño },
+      { path: 'admin/reporteporempresa', name: 'AdminReportePorEmpresa', component: AdminReportePorEmpresa },
+      { path: 'admin/reportepormodalidad', name: 'AdminReportePorModalidad', component: AdminReportePorModalidad },
+      { path: 'instructor/bitacoras', name: 'InstructorBitacoras', component: InstructorBitacoras },
+      { path: 'instructor/historial', name: 'InstructorHistorial', component: InstructorHistorial },
+      { path: 'instructor/informepersonal', name: 'InstructorInformePersonal', component: InstructorInformePersonal },
+      { path: 'instructor/misaprendices', name: 'InstructorMisAprendices', component: InstructorMisAprendices },
+      { path: 'instructor/novedades', name: 'InstructorNovedades', component: InstructorNovedades },
+      { path: 'instructor/seguimientos', name: 'InstructorSeguimientos', component: InstructorSeguimientos },
+      { path: 'aprendiz/bitacoras', name: 'Bitacoras', component: Bitacoras },
+      { path: 'aprendiz/datospersonales', name: 'DatosPersonales', component: DatosPersonales },
+      { path: 'aprendiz/misregistros', name: 'MisRegistros', component: MisRegistros },
+      { path: 'aprendiz/procesoep', name: 'ProcesoEP', component: ProcesoEP },
+      { path: 'aprendiz/registroep', name: 'RegistroEP', component: RegistroEP },
+      { path: 'aprendiz/modalidadesEP/contratodeaprendizaje', name: 'ContratoAprendizaje', component: ContratoAprendizaje },
+      { path: 'aprendiz/modalidadesEP/monitoriasena', name: 'MonitoriaSENA', component: MonitoriaSENA },
+      { path: 'aprendiz/modalidadesEP/pasantiaongentidad', name: 'PasantiaONGEntidad', component: PasantiaONGEntidad },
+      { path: 'aprendiz/modalidadesEP/pasantiapyme', name: 'PasantiaPyME', component: PasantiaPyME },
+      { path: 'aprendiz/modalidadesEP/pasantiaupfamiliar', name: 'PasantiaUPFamiliar', component: PasantiaUPFamiliar },
+      { path: 'aprendiz/modalidadesEP/proyectoproductiva', name: 'ProyectoProductiva', component: ProyectoProductiva },
+      { path: 'aprendiz/modalidadesEP/vinculolaboralcontractual', name: 'VinculoLaboralContractual', component: VinculoLaboralContractual },
+      { path: 'admin/novedadesAdmin', name: 'novedadesAdmin', component: novedadesAdmin }
     ]
   }
 ]
