@@ -1,5 +1,6 @@
 <template>
-  <div class="center">
+  <q-page-container style="margin-top: 5px;">
+    <div class="center">
     <div class="grid">
       <Card
         v-if="role === 'ETAPA PRODUCTIVA VIRTUAL' || role === 'ETAPA PRODUCTIVA PRESENCIAL'"
@@ -124,7 +125,10 @@
 
     </div>
   </div>
+  </q-page-container>
 </template>
+  
+  
 <script setup>
 import Card from '../components/cards/MenuCard.vue';
 

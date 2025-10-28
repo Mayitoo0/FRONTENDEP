@@ -8,7 +8,7 @@
     </q-card-section>
         
       <q-card-section>
-        <slot>
+        <slot name="body">
           <!-- Contenido por defecto si no se proporciona ningún slot -->
           <p>Contenido del diálogo por defecto, esto no se va a ver en el modal si colocan contenido</p>
         </slot>

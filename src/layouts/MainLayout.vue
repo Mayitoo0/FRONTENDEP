@@ -29,7 +29,7 @@
       </div>
     </transition>
 
-    <q-page-container style="max-width: 100% !important;">
+    <q-page-container style="max-width: 100% !important; padding-top:0 !important;">
       <router-view />
 
       <div class="notification-container" aria-hidden="false">

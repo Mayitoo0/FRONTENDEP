@@ -827,7 +827,6 @@ const cargarEmpresas = async () => {
   try {
     loading.value = true
     empresas.value = [] // Inicializar como array vacío
-    console.log('🚀 Iniciando carga de empresas...')
     
     // Verificar autenticación
     const auth = JSON.parse(localStorage.getItem('auth') || '{}')
@@ -836,8 +835,7 @@ const cargarEmpresas = async () => {
     if (!auth.token) {
       throw new Error('No hay token de autenticación')
     }
-    
-    console.log('📡 Haciendo petición a: /companies/listCompanies')
+
     const response = await apiClient.get('/companies/listCompanies')
     
 
@@ -845,29 +843,24 @@ const cargarEmpresas = async () => {
     let data = []
     const payload = response?.data
     
-    console.log('🔍 Analizando payload:', payload)
     
     if (payload?.companies && Array.isArray(payload.companies)) {
       data = payload.companies
-      console.log('📋 Usando payload.companies')
     } else if (payload?.data && Array.isArray(payload.data)) {
       data = payload.data
-      console.log('📋 Usando payload.data')
+
     } else if (payload?.msg && Array.isArray(payload.msg)) {
       data = payload.msg
-      console.log('📋 Usando payload.msg')
+
     } else if (Array.isArray(payload)) {
       data = payload
-      console.log('📋 Usando payload directo')
+
     } else {
-      console.log('❌ Formato de respuesta no reconocido')
-      console.log('🔍 Tipo de payload:', typeof payload)
-      console.log('🔍 Keys del payload:', Object.keys(payload || {}))
+
     }
     
-    console.log('✨ Datos procesados:', data)
     empresas.value = Array.isArray(data) ? data : []
-    console.log('📊 Empresas asignadas:', empresas.value.length, 'empresas')
+
     
     if (empresas.value.length === 0) {
       $q.notify({
@@ -882,10 +875,7 @@ const cargarEmpresas = async () => {
     }
     
 } catch (error) {
-    console.error('💥 Error al cargar empresas:', error)
-    console.error('💥 Error response:', error.response)
-    console.error('💥 Error data:', error.response?.data)
-    
+
     empresas.value = []
     
     let errorMessage = 'Error al cargar las empresas'
@@ -960,9 +950,7 @@ const editarEmpresa = (empresa) => {
 const desactivarEmpresa = async (id) => {
   try {
     loading.value = true
-    console.log('Intentando desactivar empresa con ID:', id)
   const response = await apiClient.put(`/companies/inactiveCompanies/${id}`)
-    console.log('Respuesta al desactivar:', response)
 
     if (response?.data) {
       const empresaActualizada = response.data
@@ -978,8 +966,7 @@ const desactivarEmpresa = async (id) => {
       message: 'Empresa desactivada exitosamente'
     })
   } catch (error) {
-    console.error('Error al desactivar empresa:', error)
-    console.error('Detalles del error:', error.response?.data)
+
     $q.notify({
       type: 'negative',
       message: `Error al desactivar la empresa: ${error.response?.data?.message || error.message}`
