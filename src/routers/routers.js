@@ -18,7 +18,7 @@ import AdminAlmacenamiento from '../views/admin/parametros/Almacenamiento.vue'
 import AdminHorasIntructores from '../views/admin/parametros/HorasInstructores.vue'
 import AdminParamaterosModalidades from '../views/admin/parametros/Modalidades.vue'
 import AdminProcesoFormativo from '../views/admin/parametros/ProcesoFormativo.vue'
-import AdminSeguridad from '../views/admin/parametros/ProcesoFormativo.vue'
+import AdminSeguridad from '../views/admin/parametros/Seguridad.vue'
 import AdminHorasPorInstructor from '../views/admin/reportes/HorasPorInstructor.vue'
 import AdminReportePorAño from '../views/admin/reportes/ReportePorAño.vue'
 import AdminReportePorEmpresa from '../views/admin/reportes/ReportePorEmpresa.vue'
@@ -49,6 +49,9 @@ import AdminVistaReportePorAño from '../views/admin/reportes/VistaReportePorAñ
 import AdminVistaReportePorEmpresa from '../views/admin/reportes/VistaReportePorEmpresa.vue'
 import AdminVistaReportePorModalidad from '../views/admin/reportes/VistaReportePorModalidad.vue'
 import AdminVistaReortePorInstructor from '../views/admin/reportes/VistaReportePorInstructor.vue'
+import BuscarFicha from '../views/admin/BuscarFicha.vue'
+import VistaDocumentos from '../views/admin/VistaDocumentos.vue'
+import DetalleAprendizDocumentos from '../views/admin/DetalleAprendizDocumentos.vue'
 
 const routes = [
   { path: "/", component: Login },
@@ -103,6 +106,9 @@ const routes = [
       { path: 'admin/vistareporteporempresa', name: 'AdminVistaReportePorEmpresa', component: AdminVistaReportePorEmpresa },
       { path: 'admin/vistareportepormodalidad', name: 'AdminVistaReportePorModalidad', component: AdminVistaReportePorModalidad },
       { path: 'admin/vistareporteporinstructor', name: 'AdminVistaReortePorInstructor', component: AdminVistaReortePorInstructor },
+      { path: 'admin/buscar-ficha', name: 'BuscarFicha', component: BuscarFicha },
+      { path: 'admin/documentos/:ficha', name: 'vista-documentos', component: VistaDocumentos },
+      { path: 'admin/documentos/:ficha/aprendiz/:aprendizId', name: 'detalle-aprendiz', component: DetalleAprendizDocumentos },
 
     ]
   }

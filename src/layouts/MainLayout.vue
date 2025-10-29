@@ -2,8 +2,8 @@
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="text-white custom-header">
       <div class="header-container">
-        <q-avatar size="90px" class="header-avatar">
-          <img src="/src/assets/logoSENABlanco.png" alt="logo" />
+        <q-avatar class="header-avatar">
+          <img src="/src/assets/logoSENABlanco.png" alt="logo SENA" />
         </q-avatar>
         <span class="header-title">REPFORA EP</span>
         <div class="header-action-btn">
@@ -16,8 +16,7 @@
 
     <transition name="fade">
       <div v-if="showMorph" class="morph-float-card">
-        <q-card class="bg-primary text-white"
-          style="width: 320px; border-radius: 1.5em; background-color: #5ccb5f !important;">
+        <q-card class="bg-primary text-white morph-card">
           <q-card-section class="text-h6">
             ¡Hola, <strong>{{ firstName || 'Usuario' }} {{ lastName || '' }}</strong>, bienvenido!
           </q-card-section>
@@ -29,7 +28,7 @@
       </div>
     </transition>
 
-    <q-page-container style="max-width: 100% !important; padding-top:0 !important;">
+    <q-page-container class="page-container">
       <router-view />
 
       <div class="notification-container" aria-hidden="false">
@@ -49,11 +48,11 @@
 
             <q-separator />
 
-            <q-scroll-area style="height: 260px;">
+            <q-scroll-area class="notification-scroll-area">
               <q-list padding>
                 <q-item v-for="note in notifications" :key="note.id" clickable :class="{ 'unread': !note.read }">
                   <q-item-section avatar>
-                    <div class="note-thumb" style="background-image: url('/logo-del-sena-01.png')"></div>
+                    <div class="note-thumb"></div>
                   </q-item-section>
 
                   <q-item-section>
@@ -211,9 +210,11 @@ const logout = () => {
   overflow: hidden;
 }
 
+/* HEADER RESPONSIVE - LOGO SIN MODIFICACIONES */
 .custom-header {
   background-color: #39a900;
-  height: 90px;
+  height: auto;
+  min-height: 90px;
   position: relative;
 }
 
@@ -223,30 +224,44 @@ const logout = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 90px;
+  height: auto;
+  min-height: 90px;
   padding: 0 32px;
+  flex-wrap: wrap;
 }
 
+/* LOGO DEL SENA SIN MODIFICACIONES - MANTIENE TAMAÑO ORIGINAL */
 .header-avatar {
   position: static;
   margin-right: 16px;
+  width: 90px !important;
+  height: 90px !important;
+  flex-shrink: 0;
 }
 
 .header-avatar img {
-  width: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
+/* SOLO EL TÍTULO ES RESPONSIVE */
 .header-title {
-  font-size: 3rem;
+  font-size: clamp(1.8rem, 4vw, 3rem);
   font-weight: bold;
-  line-height: 80px;
+  line-height: 1.2;
   color: white;
+  flex: 1;
+  text-align: center;
+  margin: 0 16px;
 }
 
 .header-action-btn {
   position: static;
+  flex-shrink: 0;
 }
 
+/* MORPH CARD RESPONSIVE */
 .morph-float-card {
   position: fixed;
   top: 90px;
@@ -254,35 +269,23 @@ const logout = () => {
   z-index: 9999;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s, transform 0.3s;
+.morph-card {
+  width: 320px;
+  border-radius: 1.5em;
+  background-color: #5ccb5f !important;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
+/* PAGE CONTAINER */
+.page-container {
+  max-width: 100% !important;
+  padding-top: 0 !important;
+  min-height: calc(100vh - 120px);
 }
 
-.custom-footer {
-  background-color: #f5f5f5;
-  color: #333;
-  text-align: center;
-  padding: 0;
-  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.footer-text {
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-}
-
+/* NOTIFICATIONS RESPONSIVE */
 .notification-container {
   position: fixed;
   right: 16px;
-
   bottom: calc(var(--app-footer-height, 56px) + 16px);
   z-index: 14000;
   display: flex;
@@ -290,7 +293,6 @@ const logout = () => {
   align-items: flex-end;
   pointer-events: none;
 }
-
 
 .notification-container>.q-card,
 .notification-container>.q-btn {
@@ -300,13 +302,18 @@ const logout = () => {
 .notification-panel {
   margin-bottom: 12px;
   width: 360px;
-  max-width: 90vw;
+  max-width: calc(100vw - 32px);
   border-radius: 12px;
   overflow: hidden;
   background: #fff;
   color: #222;
   z-index: 15000;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.notification-scroll-area {
+  height: 260px;
+  max-height: 40vh;
 }
 
 .note-thumb {
@@ -322,9 +329,151 @@ const logout = () => {
 .notifications-btn {
   margin: 0;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-
 }
 
+/* FOOTER */
+.custom-footer {
+  background-color: #f5f5f5;
+  color: #333;
+  text-align: center;
+  padding: 0;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.footer-text {
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 8px;
+}
+
+/* TRANSITIONS */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* MEDIA QUERIES */
+@media (max-width: 1024px) {
+  .header-container {
+    padding: 0 24px;
+  }
+  
+  .header-title {
+    font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+  }
+  
+  .morph-float-card {
+    right: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0 16px;
+    justify-content: space-between;
+  }
+  
+  .header-title {
+    font-size: 1.8rem;
+    margin: 0 12px;
+    text-align: center;
+  }
+  
+  .header-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    margin-right: 12px;
+  }
+  
+  .morph-float-card {
+    top: 80px;
+    right: 16px;
+  }
+  
+  .morph-card {
+    width: 280px;
+  }
+  
+  .notification-container {
+    right: 12px;
+    bottom: calc(var(--app-footer-height, 50px) + 12px);
+  }
+  
+  .notification-panel {
+    width: 320px;
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-header {
+    min-height: 80px;
+  }
+  
+  .header-container {
+    padding: 0 12px;
+    min-height: 80px;
+  }
+  
+  .header-title {
+    font-size: 1.5rem;
+    margin: 0 8px;
+  }
+  
+  .header-avatar {
+    width: 70px !important;
+    height: 70px !important;
+    margin-right: 8px;
+  }
+  
+  .morph-float-card {
+    top: 75px;
+    right: 12px;
+  }
+  
+  .morph-card {
+    width: 260px;
+  }
+  
+  .notification-panel {
+    width: 280px;
+  }
+  
+  .notification-scroll-area {
+    height: 220px;
+  }
+}
+
+@media (max-width: 360px) {
+  .header-container {
+    padding: 0 8px;
+  }
+  
+  .header-title {
+    font-size: 1.3rem;
+  }
+  
+  .header-avatar {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  
+  .morph-card {
+    width: 240px;
+  }
+  
+  .notification-panel {
+    width: 260px;
+  }
+}
+
+/* Z-INDEX MANAGEMENT */
 .q-footer {
   z-index: 1000;
 }

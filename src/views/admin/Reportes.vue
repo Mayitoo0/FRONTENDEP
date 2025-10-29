@@ -12,17 +12,17 @@
 
     <!-- Grid de reportes -->
     <div class="reportes-grid">
-      <Card title="Reporte por Año" subtitle="" imgSrc="/src/assets/logo_sena.png" route="/app/admin/reporteporaño"
+      <Card title="Reporte por Año" subtitle="" imgSrc="/src/assets/Contrato_Aprendizaje.jpg" route="/app/admin/reporteporaño"
         color="#5db82f" textColor="white" />
 
-      <Card title="Reporte por Modalidad" subtitle="" imgSrc="/src/assets/logo_sena.png"
+      <Card title="Reporte por Modalidad" subtitle="" imgSrc="/src/assets/Modalidad,Contrato_negro.jpg"
         route="/app/admin/reportepormodalidad" color="#5db82f" textColor="white" />
 
 
-      <Card title="Horas por Instructor" subtitle="" imgSrc="/src/assets/logo_sena.png"
+      <Card title="Horas por Instructor" subtitle="" imgSrc="/src/assets/Horas_Instructor.jpg"
         route="/app/admin/horasporinstructor" color="#5db82f" textColor="white" />
 
-      <Card title="Reporte por Empresa" subtitle="" imgSrc="/src/assets/logo_sena.png"
+      <Card title="Reporte por Empresa" subtitle="" imgSrc="/src/assets/SGVA_Negro.jpg"
         route="/app/admin/reporteporempresa" color="#5db82f" textColor="white" />
     </div>
     </div>
