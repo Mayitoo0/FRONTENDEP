@@ -1,5 +1,5 @@
 <template>
-  <div class="center">
+  <div class="center" style="margin-top: 20px;">
     <div class="grid">
       <Card
         title="HORAS INSTRUCTORES" 
@@ -55,7 +55,7 @@
         title="PLANTILLAS" 
         subtitle="Consulta de Plantillas"
         imgSrc="/src/assets/Plantillas_Negro.jpg" 
-        route="/vista" 
+        route="/app/admin/plantillas" 
         color="#5db82f" 
         textColor="white" />
 

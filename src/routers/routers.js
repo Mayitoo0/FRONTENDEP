@@ -44,6 +44,7 @@ import novedadesAdmin from "../views/admin/novedadesAdmin.vue"
 import CambiarContrasena from "../views/aprendiz/CambiarContrasena.vue"
 import IngresarCodigoContrasena from "../views/aprendiz/IngresarCodigoContrasena.vue"
 import NuevaContrasena from "../views/aprendiz/NuevaContrasena.vue"
+import plantillas from "../views/admin/parametros/plantillas.vue"
 
 const routes = [
   { path: "/", component: Login },
@@ -92,7 +93,8 @@ const routes = [
       { path: 'aprendiz/modalidadesEP/pasantiaupfamiliar', name: 'PasantiaUPFamiliar', component: PasantiaUPFamiliar },
       { path: 'aprendiz/modalidadesEP/proyectoproductiva', name: 'ProyectoProductiva', component: ProyectoProductiva },
       { path: 'aprendiz/modalidadesEP/vinculolaboralcontractual', name: 'VinculoLaboralContractual', component: VinculoLaboralContractual },
-      { path: 'admin/novedadesAdmin', name: 'novedadesAdmin', component: novedadesAdmin }
+      { path: 'admin/novedadesAdmin', name: 'novedadesAdmin', component: novedadesAdmin },
+      { path: 'admin/plantillas', name: 'plantillas', component: plantillas },
     ]
   }
 ]
