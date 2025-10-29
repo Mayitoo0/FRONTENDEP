@@ -33,13 +33,6 @@
           color="#5db82f" 
           textColor="white" />
         <Card
-          title="MODALIDADES" 
-          subtitle="Consulta Modalidades" 
-          imgSrc="/src/assets/Modalidades.jpg" 
-          route="/app/admin/paramaterosmodalidades"
-          color="#5db82f" 
-          textColor="white" />
-        <Card
           title="SEGURIDAD" 
           subtitle="Consulta y Visualización de Seguridad" 
           imgSrc="/src/assets/Seguridad.jpg" 
