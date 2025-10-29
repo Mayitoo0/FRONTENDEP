@@ -120,17 +120,10 @@ const getParametersHoursInstructor = async () => {
 onMounted(() => {
   getParametersHoursInstructor()
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
 </script>
+
+<style scoped>
+.page-container{
+  padding: 1rem;
+}
+</style>

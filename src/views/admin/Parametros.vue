@@ -1,5 +1,7 @@
 <template>
+  <div class="page-content">
       <BackButton />
+      
   <div class="center" style="margin-top: 20px;">
 
     <div class="grid">
@@ -63,6 +65,7 @@
 
     </div>
   </div>
+  </div>
 </template>
 <script setup>
 import BackButton from '../../components/BackButton.vue';
@@ -70,6 +73,11 @@ import Card from 'src/components/cards/MenuCard.vue';
 
 </script>
 <style scoped>
+
+.page-content{
+  padding: 1rem;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

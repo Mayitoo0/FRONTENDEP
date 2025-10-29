@@ -1,11 +1,11 @@
 <template>
-  <div class="center">
+  <div class="center" style="margin-top: 80px;">
     <div class="grid">
       <Card
         title="Datos Personales"
         subtitle="Visualización de datos y cambios "
         imgSrc="/src/assets/Almacenamiento.jpg"
-        route="/vista"
+        route="datospersonales"
         color="#5db82f"
         textColor="white"
       />
@@ -50,12 +50,11 @@ import Card from 'src/components/cards/MenuCard.vue'
   justify-items: center;
   align-items: center;
 }
+
 .center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   max-width: 100vw;
-  max-height: calc(100vh - 180px);
-  overflow-y: auto;
 }
 </style>

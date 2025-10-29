@@ -1,4 +1,6 @@
 <template>
+  <div class="page-content">
+    <BackButton/>
   <div>
     <h1 style="font-size: 40px; text-align: center;">SELECCIONAR FICHA</h1>
 
@@ -9,6 +11,7 @@
     </div>
 
   </div>
+  </div>
 </template>
 
 
@@ -16,6 +19,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { getData } from '../../services/apiClient';
+import BackButton from 'src/components/BackButton.vue'
 
 const fiches = ref([])
 const model = ref(null)
@@ -34,4 +38,9 @@ const getFiches = async (number, update) => {
 
 </script>
 
-<style scoped></style>
+<style scoped>
+.page-content {
+  padding: 1rem;
+}
+
+</style>

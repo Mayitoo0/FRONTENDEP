@@ -47,7 +47,7 @@
         title="Reportes" 
         subtitle="Consulta y Visualización de Reportes" 
         imgSrc="/src/assets/pyme.jpg" 
-        route="/vista"
+        route="/app/admin/reportes"
         color="#5db82f" 
         textColor="white" />
 

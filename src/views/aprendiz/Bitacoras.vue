@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <div class="page-content">
+    <BackButton/>
+    <div>
     <h1 class="titulo-principal">Bitácoras y Documentos</h1>
 
     <!-- Pestañas -->
@@ -146,6 +148,7 @@
         </div>
       </template>
     </ModalBase>
+    </div>
   </div>
 </template>
 
@@ -155,6 +158,7 @@ import Tabla from 'src/components/tables/maintable.vue'
 import ModalBase from 'src/components/modals/modalComponent.vue'
 import BotonEnviar from 'src/components/BotonEnviar.vue' 
 import BotonCerrar from 'src/components/BotonCerrar.vue'
+import BackButton from 'src/components/BackButton.vue'
 
 // Referencias
 const uploadModal = ref(null)
@@ -226,6 +230,10 @@ const subirBitacoras = async () => {
 </script>
 
 <style scoped>
+.page-content {
+  padding: 1rem;
+}
+
 .titulo-principal {
   font-size: 42px;
   font-weight: bold;

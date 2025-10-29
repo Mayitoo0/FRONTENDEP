@@ -45,6 +45,10 @@ import CambiarContrasena from "../views/aprendiz/CambiarContrasena.vue"
 import IngresarCodigoContrasena from "../views/aprendiz/IngresarCodigoContrasena.vue"
 import NuevaContrasena from "../views/aprendiz/NuevaContrasena.vue"
 import plantillas from "../views/admin/parametros/plantillas.vue"
+import AdminVistaReportePorAño from '../views/admin/reportes/VistaReportePorAño.vue'
+import AdminVistaReportePorEmpresa from '../views/admin/reportes/VistaReportePorEmpresa.vue'
+import AdminVistaReportePorModalidad from '../views/admin/reportes/VistaReportePorModalidad.vue'
+import AdminVistaReortePorInstructor from '../views/admin/reportes/VistaReportePorInstructor.vue'
 
 const routes = [
   { path: "/", component: Login },
@@ -95,6 +99,11 @@ const routes = [
       { path: 'aprendiz/modalidadesEP/vinculolaboralcontractual', name: 'VinculoLaboralContractual', component: VinculoLaboralContractual },
       { path: 'admin/novedadesAdmin', name: 'novedadesAdmin', component: novedadesAdmin },
       { path: 'admin/plantillas', name: 'plantillas', component: plantillas },
+      { path: 'admin/vistareporteporaño', name: 'AdminVistaReportePorAño', component: AdminVistaReportePorAño },
+      { path: 'admin/vistareporteporempresa', name: 'AdminVistaReportePorEmpresa', component: AdminVistaReportePorEmpresa },
+      { path: 'admin/vistareportepormodalidad', name: 'AdminVistaReportePorModalidad', component: AdminVistaReportePorModalidad },
+      { path: 'admin/vistareporteporinstructor', name: 'AdminVistaReortePorInstructor', component: AdminVistaReortePorInstructor },
+
     ]
   }
 ]

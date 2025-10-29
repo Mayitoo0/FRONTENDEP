@@ -1,5 +1,8 @@
 <template>
-  <div class="registro-container">
+  <div class="page-content">
+    <BackButton/>
+
+    <div class="registro-container">
     <div class="text-center q-mb-xl">
       <h1 class="text-h3 text-weight-bold text-black">
         Registro Etapas Productivas
@@ -96,7 +99,7 @@
       </div>
     </template>
 
-    <template #default>
+    <template #body>
       <p class="text-center text-grey-7 q-mb-lg">
         El sistema calculará automáticamente la fecha estimada de finalización
       </p>
@@ -131,7 +134,7 @@
       </div>
     </template>
 
-    <template #default>
+    <template #body>
       <p class="text-center text-grey-8">
         Fecha seleccionada: <b>{{ selectedDate }}</b>
       </p>
@@ -144,6 +147,7 @@
       </div>
     </template>
   </modalComponent>
+  </div>
 </template>
 
 <script setup>
@@ -153,6 +157,7 @@ import modalComponent from 'src/components/modals/modalComponent.vue'
 import BotonEnviar from 'src/components/BotonEnviar.vue'
 import BotonCerrar from 'src/components/BotonCerrar.vue'
 import Card from 'src/components/cards/MenuCard.vue'
+import BackButton from 'src/components/BackButton.vue'
 
 
 const $q = useQuasar()
@@ -197,6 +202,10 @@ const cerrarConfirmacion = () => {
 </script>
 
 <style scoped>
+.page-content {
+  padding: 1rem;
+}
+
 .registro-container {
   padding: 2rem;
   max-width: 1400px;

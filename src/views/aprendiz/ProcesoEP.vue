@@ -1,8 +1,7 @@
-PROCESO EP:
-
-
 <template>
-  <div class="container-etapa">
+  <div class="page-content">
+    <BackButton/>
+    <div class="container-etapa">
     <!-- Encabezado con título y badge -->
     <div class="header-section">
       <h2 class="titulo-principal">Estado De Etapa Productiva</h2>
@@ -52,10 +51,14 @@ PROCESO EP:
         @click="handleNovedades"
       />
     </div>
+    </div>
   </div>
 </template>
 
 <script setup>
+import BackButton from '../../components/BackButton.vue'
+
+
 const emit = defineEmits(['pendientes', 'novedades'])
 
 function handlePendientes() {
@@ -68,6 +71,10 @@ function handleNovedades() {
 </script>
 
 <style scoped>
+.page-content {
+  padding: 1rem;
+}
+
 .container-etapa {
   max-width: 850px;
   margin: 0 auto;
