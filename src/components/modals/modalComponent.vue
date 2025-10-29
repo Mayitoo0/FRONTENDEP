@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="isOpen">
-    <q-card>
+    <q-card :style="cardStyle">
     <q-card-section style="background-color: #39a900; color: white;">
         <slot name="header">
             <div class="text-h6">Título por defecto</div>
@@ -24,11 +24,27 @@
 </template>
 
 <script setup>
-import { ref, defineExpose } from 'vue';
+import { ref, defineExpose, watch, defineEmits, computed } from 'vue';
+
+const props = defineProps({
+  width: {
+    type: String,
+    default: '400px'
+  },
+  maxWidth: {
+    type: String,
+    default: '95vw'
+  }
+})
 
 const isOpen = ref(false);
 
-const emit = defineEmits(['accept']);
+const emit = defineEmits(['accept', 'update:modelValue']);
+
+const cardStyle = computed(() => ({
+  minWidth: props.width,
+  maxWidth: props.maxWidth
+}))
 
 const openDialog = () => {
   isOpen.value = true;
@@ -42,6 +58,11 @@ const acceptDialog = () => {
   isOpen.value = false;
   emit('accept');
 };
+
+// Emitir cambios de estado para sincronización externa
+watch(isOpen, (newVal) => {
+  emit('update:modelValue', newVal);
+});
 
 defineExpose({
   openDialog,

@@ -1,7 +1,7 @@
 <template>
   <PublicLayout>
     <q-page class="q-pa-md">
-      <BackButton />
+      <BackButton :disabled="showCreateModal || showEditModal || showDetailsModal || showConfirmModal || showUploadModal" />
       
       <!-- Título principal -->
       <div class="text-center q-mb-lg">
@@ -33,22 +33,28 @@
             />
           </div>
           <div class="col-12 col-md-4 text-right">
-            <Button1
-              label="+ Nueva Empresa"
-              @click="showCreateModal = true"
-            />
+            <div class="row q-gutter-sm justify-end">
+              <Button1
+                label="Carga Masiva"
+                @click="uploadModalRef?.openDialog()"
+                icon="upload_file"
+              />
+              <Button1
+                label="+ Nueva Empresa"
+                @click="openCreateModal"
+              />
+            </div>
           </div>
         </div>
 
-        <!-- Tabla de empresas (reemplazada por componente Tabla) -->
-        <Tabla
-          :rows="filteredEmpresas"
-          :columns="columns"
+        <!-- Tabla de empresas -->
+        <maintable
+          :datos="filteredEmpresas"
+          :columnas="columns"
           row-key="_id"
-          :loading="loading"
         >
-          <template #acciones="{ row }">
-            <div class="row items-center no-wrap justify-center">
+          <template #body-cell-acciones="{ row }">
+            <q-td class="text-center">
               <q-btn flat round color="grey" icon="visibility" @click="verDetalles(row)">
                 <q-tooltip>Ver detalles</q-tooltip>
               </q-btn>
@@ -64,25 +70,21 @@
               >
                 <q-tooltip>{{ row.status === 0 ? 'Desactivar' : 'Activar' }}</q-tooltip>
               </q-btn>
-            </div>
+            </q-td>
           </template>
-        </Tabla>
+        </maintable>
       </div>
 
       <!-- Modal de detalles de empresa -->
-      <q-dialog v-model="showDetailsModal">
-        <q-card class="detail-modal" style="width: 1200px; max-width: 98vw;">
-          <q-card-section class="row items-center q-pb-none justify-center">
-            <div class="text-h4 company-title">
-              {{ selectedEmpresa?.name }}
-            </div>
-          </q-card-section>
+            <!-- Modal de Detalles -->
+      <modalComponent ref="detailsModalRef" v-model="showDetailsModal" width="1200px" max-width="98vw">
+        <template #header>
+          <div class="text-h6">Perfil de Empresa</div>
+        </template>
 
-          <q-separator class="q-my-md" />
-
-          <q-card-section class="q-pt-md">
-            <div class="row q-col-gutter-lg">
-              <!-- Datos de la empresa -->
+        <template #body>
+          <div class="detail-content">
+            <div class="row q-col-gutter-lg q-pa-md">
               <div class="col-12 col-md-6">
                 <div class="text-h6 q-mb-md section-title">Datos de la empresa</div>
                 <div class="data-grid">
@@ -101,7 +103,6 @@
                 </div>
               </div>
 
-              <!-- Contacto de la empresa -->
               <div class="col-12 col-md-6">
                 <div class="text-h6 q-mb-md section-title">Contacto de la empresa</div>
                 <div class="data-grid">
@@ -128,24 +129,26 @@
                 </div>
               </div>
             </div>
-          </q-card-section>
+          </div>
+        </template>
 
-          <q-card-actions align="center" class="q-mt-md">
-            <ModalButton
-              type="cancel"
-              label="Cerrar"
-              @click="showDetailsModal = false"
-            />
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
+        <template #footer>
+          <ModalButton
+            type="cancel"
+            label="Cerrar"
+            @click="detailsModalRef?.closeDialog()"
+          />
+        </template>
+      </modalComponent>
 
       <!-- Modal para crear empresa -->
-      <Modal_new v-model="showCreateModal" :loading="saving">
-        <template #title>Añadir nueva empresa</template>
-        
-        <q-form @submit.prevent="createCompany" class="q-gutter-md">
-          <div class="row q-col-gutter-lg">
+      <modalComponent ref="createModalRef" v-model="showCreateModal" width="900px" max-width="98vw">
+        <template #header>
+          <div class="text-h5">Añadir nueva empresa</div>
+        </template>
+
+        <template #body>
+          <div class="row q-col-gutter-lg q-pa-md">
             <!-- Datos de la empresa -->
             <div class="col-12 col-md-6">
               <div class="text-h6 q-mb-md section-title">Datos de la empresa</div>
@@ -173,71 +176,33 @@
                   val => /^[a-zA-ZÀ-ÿ0-9\s.]+$/.test(val) || 'La razón social solo debe contener letras, números, espacios y puntos'
                 ]"
               />
-              <q-input
+              <div class="text-h6 q-mb-md q-mt-lg section-title">Dirección</div>
+              <q-select
                 outlined
-                v-model="formData.location"
-                label="Direccion"
+                v-model="selectedDepartamento"
+                :options="departamentos"
+                option-label="label"
+                option-value="value"
+                emit-value
+                map-options
+                label="Departamento"
+                class="q-mb-md"
                 :rules="[
-                  val => !!val || 'La ubicación es requerida',
-                  val => val.includes(',') && val.split(',').length === 2 || 'El formato debe ser: Ciudad, Departamento',
-                  val => val.split(',').every(part => part.trim().length >= 3) || 'La ciudad y el departamento deben tener al menos 3 caracteres',
-                  val => /^[a-zA-ZÀ-ÿ\s,]+$/.test(val) || 'La ubicación solo debe contener letras, espacios y comas'
+                  val => !!val || 'El departamento es requerido'
                 ]"
               />
-              <!-- Carga masiva -->
-              <div class="text-h6 q-mb-md section-title">Carga masiva de Empresas</div>
-                  <div class="upload-area row items-center justify-center" style="min-height: 180px; border: 2px dashed rgba(0,0,0,0.12); border-radius: 8px; background-color: #fafafa;"
-                    :class="{ 'upload-active': dragActive }"
-                    @dragover.prevent
-                    @dragenter.prevent="dragActive = true"
-                    @dragleave.prevent="dragActive = false"
-                    @drop.prevent="onFilesDropped"
-                  >
-                    <input
-                      id="bulkFiles"
-                      ref="bulkInput"
-                      type="file"
-                      accept=".csv,.xlsx,.xls"
-                      @change="onFilesSelected"
-                      class="hidden-file-input"
-                    />
-
-                    <label for="bulkFiles" class="upload-label q-pa-md column items-center text-center" style="cursor: pointer;">
-                      <div class="upload-icon q-mb-sm">
-                        <q-icon name="folder_open" size="90" color="grey" style="font-size: 90px !important;" />
-                      </div>
-                      <div class="text-subtitle1 q-mb-sm">Arrastrar archivos aquí o hacer click para seleccionar</div>
-                      <div class="text-caption text-grey">Formatos admitidos: CSV, Excel (.xlsx, .xls)</div>
-                    </label>
-                  </div>
-                  
-                  <!-- Información del archivo seleccionado y botón de carga -->
-                  <div v-if="selectedFile" class="q-mt-md">
-                    <div class="row items-center q-mb-md">
-                      <q-icon name="attachment" color="primary" class="q-mr-sm" />
-                      <span class="text-body2">{{ selectedFile.name }}</span>
-                      <q-btn 
-                        flat 
-                        round 
-                        dense 
-                        icon="close" 
-                        color="grey" 
-                        @click="clearSelectedFile"
-                        class="q-ml-auto"
-                      >
-                        <q-tooltip>Quitar archivo</q-tooltip>
-                      </q-btn>
-                    </div>
-                    <q-btn
-                      color="primary"
-                      label="Procesar Carga Masiva"
-                      icon="cloud_upload"
-                      :loading="uploadingFile"
-                      @click="procesarCargaMasiva"
-                      class="full-width"
-                    />
-                  </div>
-                </div>
+              <q-select
+                outlined
+                v-model="selectedCiudad"
+                :options="ciudadesDisponibles"
+                label="Ciudad"
+                :disable="!selectedDepartamento"
+                :rules="[
+                  val => !!val || 'La ciudad es requerida'
+                ]"
+                :hint="!selectedDepartamento ? 'Primero selecciona un departamento' : ''"
+              />
+            </div>
 
             <!-- Contacto de la empresa -->
             <div class="col-12 col-md-6">
@@ -293,43 +258,66 @@
               />
             </div>
           </div>
-        </q-form>
+        </template>
 
-        <template #actions>
+        <template #footer>
           <ModalButton
             type="cancel"
             label="Cancelar"
-            @click="showCreateModal = false"
+            @click="createModalRef?.closeDialog()"
           />
           <ModalButton
             type="confirm"
-            label="Añadir Empresa"
-            :loading="saving"
-            :disabled="!isFormValid"
+            label="Crear Empresa"
             @click="createCompany"
+            :loading="saving"
           />
         </template>
-      </modal_new>
+      </modalComponent>
 
       <!-- Modal de confirmación de cambios -->
-      <ConfirmChangesModal
-        v-model="showConfirmModal"
-        :changes="getChanges()"
-        @confirm="confirmUpdate"
-        @cancel="showConfirmModal = false"
-      />
+      <modalComponent ref="confirmModalRef" v-model="showConfirmModal">
+        <template #header>
+          <div class="text-h5">Confirmar cambios</div>
+        </template>
+
+        <template #body>
+          <div class="q-pa-md">
+            <p class="text-body1 q-mb-md">¿Estás seguro de que deseas realizar los siguientes cambios?</p>
+            <div v-for="(change, index) in getChanges()" :key="index" class="change-item q-mb-sm">
+              <div class="text-weight-bold">{{ change.label }}:</div>
+              <div class="change-values">
+                <span class="old-value">{{ change.old }}</span>
+                <q-icon name="arrow_forward" class="q-mx-sm" />
+                <span class="new-value">{{ change.new }}</span>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <template #footer>
+          <ModalButton
+            type="cancel"
+            label="Cancelar"
+            @click="confirmModalRef?.closeDialog()"
+          />
+          <ModalButton
+            type="confirm"
+            label="Confirmar"
+            @click="confirmUpdate"
+          />
+        </template>
+      </modalComponent>
 
       <!-- Modal para editar empresa -->
-      <ModalEdit 
-        v-model="showEditModal" 
-        :loading="saving"
-        @hide="handleModalClose"
-      >
-        <template #title>Editar empresa</template>
-        
-        <q-form @submit.prevent="updateCompany" class="q-gutter-md">
-          <div class="row q-col-gutter-lg">
-            <!-- Datos de la empresa -->
+      <!-- Modal de Editar Empresa -->
+      <modalComponent ref="editModalRef" v-model="showEditModal" width="900px" max-width="98vw">
+        <template #header>
+          <div class="text-h6">Editar Empresa</div>
+        </template>
+
+        <template #body>
+          <div class="row q-col-gutter-lg q-pa-md">
             <div class="col-12 col-md-6">
               <div class="text-h6 q-mb-md section-title">Datos de la empresa</div>
               <q-input
@@ -349,21 +337,34 @@
                 disable
                 hint="La razón social no se puede editar"
               />
-              <q-input
+              <div class="text-h6 q-mb-md q-mt-lg section-title">Dirección</div>
+              <q-select
                 outlined
-                v-model="editFormData.location"
-                label="Ciudad y Departamento"
-                placeholder="Ciudad, Departamento"
-                :rules=" [
-                  val => !!val || 'La ubicación es requerida',
-                  val => val.includes(',') && val.split(',').length === 2 || 'El formato debe ser: Ciudad, Departamento',
-                  val => val.split(',').every(part => part.trim().length >= 3) || 'La ciudad y el departamento deben tener al menos 3 caracteres',
-                  val => /^[a-zA-ZÀ-ÿ\s,]+$/.test(val) || 'La ubicación solo debe contener letras, espacios y comas'
+                v-model="selectedDepartamento"
+                :options="departamentos"
+                option-label="label"
+                option-value="value"
+                emit-value
+                map-options
+                label="Departamento"
+                class="q-mb-md"
+                :rules="[
+                  val => !!val || 'El departamento es requerido'
                 ]"
-                hint="Formato: Ciudad, Departamento (Ej: Bogotá, Cundinamarca)"
+              />
+              <q-select
+                outlined
+                v-model="selectedCiudad"
+                :options="ciudadesDisponibles"
+                label="Ciudad"
+                :disable="!selectedDepartamento"
+                :rules="[
+                  val => !!val || 'La ciudad es requerida'
+                ]"
+                :hint="!selectedDepartamento ? 'Primero selecciona un departamento' : ''"
               />
             </div>
-            <!-- Contacto de la empresa -->
+            
             <div class="col-12 col-md-6">
               <div class="text-h6 q-mb-md section-title">Contacto de la empresa</div>
               <q-input
@@ -418,99 +419,138 @@
               />
             </div>
           </div>
-        </q-form>
+        </template>
 
-        <template #actions>
-          <div class="row justify-center q-mt-xl q-gutter-md">
-            <ModalButton
-              type="cancel"
-              label="Cancelar"
-              @click="cancelEdit"
-            />
-            <ModalButton
-              type="confirm"
-              label="Editar Empresa"
-              @click="handleUpdate"
-              :loading="saving"
-              :disabled="!hasChanges"
-            />
+        <template #footer>
+          <ModalButton
+            type="cancel"
+            label="Cancelar"
+            @click="cancelEdit"
+          />
+          <ModalButton
+            type="confirm"
+            label="Editar Empresa"
+            @click="handleUpdate"
+            :loading="saving"
+            :disabled="!hasChanges"
+          />
+        </template>
+      </modalComponent>
+
+      <!-- Modal para carga masiva de empresas -->
+      <modalComponent ref="uploadModalRef" v-model="showUploadModal">
+        <template #header>
+          <div class="text-h5">Carga Masiva de Empresas</div>
+        </template>
+
+        <template #body>
+          <div class="q-pa-md">
+            <div class="q-mb-md">
+              <p class="text-body1 q-mb-sm">Sube un archivo Excel (.xlsx) o CSV (.csv) con la información de las empresas.</p>
+              <p class="text-caption text-grey-7">El archivo debe contener las siguientes columnas: NIT, Razón Social, Ubicación, Nombre Representante, Cargo, Teléfono, Email</p>
+            </div>
+
+            <q-file
+              v-model="uploadFile"
+              outlined
+              label="Seleccionar archivo"
+              accept=".xlsx,.xls,.csv"
+              max-file-size="5242880"
+              @rejected="onFileRejected"
+            >
+              <template v-slot:prepend>
+                <q-icon name="attach_file" />
+              </template>
+              <template v-slot:hint>
+                Formatos permitidos: Excel (.xlsx, .xls) o CSV (.csv). Tamaño máximo: 5MB
+              </template>
+            </q-file>
+
+            <div v-if="uploadFile" class="q-mt-md">
+              <q-banner class="bg-green-1 text-green-8" rounded>
+                <template v-slot:avatar>
+                  <q-icon name="check_circle" color="green" />
+                </template>
+                Archivo seleccionado: {{ uploadFile.name }} ({{ formatFileSize(uploadFile.size) }})
+              </q-banner>
+            </div>
           </div>
         </template>
-      </ModalEdit>
+
+        <template #footer>
+          <ModalButton
+            type="cancel"
+            label="Cancelar"
+            @click="cancelUpload"
+          />
+          <ModalButton
+            type="confirm"
+            label="Cargar Empresas"
+            @click="uploadMassiveCompanies"
+            :loading="saving"
+            :disabled="!uploadFile"
+          />
+        </template>
+      </modalComponent>
     </q-page>
   </PublicLayout>
 </template>
 
 <script setup>
-// Importaciones de Vue y Quasar
 import { ref, onMounted, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
 
-// Importaciones de componentes
 import BackButton from '../../components/BackButton.vue'
 import ModalButton from '../../components/modals/ModalButton.vue'
 import Button1 from '../../components/button-1.vue'
-import ConfirmChangesModal from '../../components/modals/ConfirmChangesModal.vue'
-import Tabla from '../../components/tables/tabla.vue'
-import ModalEdit from '../../components/modals/modal_edit.vue'
+import maintable from '../../components/tables/maintable.vue'
+import modalComponent from '../../components/modals/modalComponent.vue'
 
-// Importaciones de servicios
 import { apiClient } from '../../services/apiClient'
-import Modal_new from '../../components/modals/ModalNew.vue'
+import { useColombia } from '../../composables/useColombia'
 
 const $q = useQuasar()
 
-// Estados de UI
+// Composable de Colombia
+const { 
+  departamentos, 
+  getCiudadesByDepartamento,
+  getDepartamentoByCiudad
+} = useColombia()
+
+//Control de estado: Loading, guardado y filtros de tabla
 const loading = ref(false)
 const saving = ref(false)
 const search = ref('')
 const filter = ref('all')
 
 // Estados de modales
+const createModalRef = ref(null)
+const editModalRef = ref(null)
+const detailsModalRef = ref(null)
+const confirmModalRef = ref(null)
+const uploadModalRef = ref(null)
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showDetailsModal = ref(false)
 const showConfirmModal = ref(false)
+const showUploadModal = ref(false)
 const originalFormData = ref(null)
 const hasChanges = ref(false)
-
-// Computed property para validar el formulario
-const isFormValid = computed(() => {
-  return formData.value.company_nit?.trim() &&
-         formData.value.name?.trim() &&
-         formData.value.location?.trim() &&
-         formData.value.legal_representative_name?.trim() &&
-         formData.value.legal_representative_position?.trim() &&
-         formData.value.legal_representative_phone?.trim() &&
-         formData.value.legal_representative_email?.trim();
-});
 
 // Estados de datos
 const empresas = ref([])
 const selectedEmpresa = ref(null)
-const editFormData = ref({
-  company_nit: '',
-  name: '',
-  location: '',
-  legal_representative_phone: '',
-  legal_representative_name: '',
-  legal_representative_email: '',
-  legal_representative_position: ''
+const uploadFile = ref(null)
+
+// Estados para selectores de ubicación
+const selectedDepartamento = ref('')
+const selectedCiudad = ref('')
+const ciudadesDisponibles = computed(() => {
+  if (!selectedDepartamento.value) return []
+  return getCiudadesByDepartamento(selectedDepartamento.value)
 })
-// Opciones para el filtro de estados
-const estadosOptions = [
-  { label: 'TODOS LOS ESTADOS', value: 'all' },
-  { label: 'Activo', value: 0 },
-  { label: 'Inactivo', value: 1 }
-]
 
-// Función para ver detalles de empresa
-const verDetalles = (empresa) => {
-  selectedEmpresa.value = empresa
-  showDetailsModal.value = true
-}
-
-// Estado del formulario y la edición
 const formData = ref({
   company_nit: '',
   name: '',
@@ -522,162 +562,46 @@ const formData = ref({
   status: 0
 })
 
-// Estado para drag and drop y carga masiva
-const dragActive = ref(false)
-const selectedFile = ref(null)
-const uploadingFile = ref(false)
+const editFormData = ref({
+  company_nit: '',
+  name: '',
+  location: '',
+  legal_representative_phone: '',
+  legal_representative_name: '',
+  legal_representative_email: '',
+  legal_representative_position: ''
+})
 
-const onFilesSelected = (event) => {
-  const file = event.target.files?.[0]
-  if (file) {
-    const ext = file.name.split('.').pop().toLowerCase()
-    if (!['csv', 'xls', 'xlsx'].includes(ext)) {
-      event.target.value = null
-      $q.notify({ type: 'negative', message: 'Por favor seleccione un archivo CSV o Excel (.xls/.xlsx)' })
-      return
-    }
-    selectedFile.value = file
-    $q.notify({ 
-      type: 'positive', 
-      message: `Archivo seleccionado: ${file.name}` 
-    })
-  }
-}
+const estadosOptions = [
+  { label: 'TODOS LOS ESTADOS', value: 'all' },
+  { label: 'Activo', value: 0 },
+  { label: 'Inactivo', value: 1 }
+]
 
-const onFilesDropped = (event) => {
-  dragActive.value = false
-  const file = event.dataTransfer?.files?.[0]
-  if (file) {
-    const ext = file.name.split('.').pop().toLowerCase()
-    if (!['csv', 'xls', 'xlsx'].includes(ext)) {
-      $q.notify({ type: 'negative', message: 'Por favor seleccione un archivo CSV o Excel (.xls/.xlsx)' })
-      return
-    }
-    selectedFile.value = file
-    // Actualizar el input para reflejar el archivo seleccionado
-    const fileInput = document.getElementById('bulkFiles')
-    if (fileInput) {
-      const dt = new DataTransfer()
-      dt.items.add(file)
-      fileInput.files = dt.files
-    }
-    $q.notify({ 
-      type: 'positive', 
-      message: `Archivo seleccionado: ${file.name}` 
-    })
-  }
-}
-
-// Función para limpiar archivo seleccionado
-const clearSelectedFile = () => {
-  selectedFile.value = null
-  const fileInput = document.getElementById('bulkFiles')
-  if (fileInput) {
-    fileInput.value = ''
-  }
-}
-
-// Función para procesar carga masiva
-const procesarCargaMasiva = async () => {
-  if (!selectedFile.value) {
-    $q.notify({
-      type: 'warning',
-      message: 'Por favor seleccione un archivo primero'
-    })
-    return
-  }
-
-  try {
-    uploadingFile.value = true
-    
-    const formData = new FormData()
-    formData.append('file', selectedFile.value)
-
-    const response = await apiClient.post('/companies/loadMassiveCompanie', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-
-    // Recargar la tabla después de la carga exitosa
-    await cargarEmpresas()
-    
-    // Limpiar el archivo seleccionado
-    selectedFile.value = null
-    const fileInput = document.getElementById('bulkFiles')
-    if (fileInput) {
-      fileInput.value = ''
-    }
-
-    $q.notify({
-      type: 'positive',
-      message: response.data?.message || 'Empresas cargadas exitosamente'
-    })
-    
-    // Cerrar el modal después de una carga exitosa
-    showCreateModal.value = false
-
-  } catch (error) {
-    console.error('Error en carga masiva:', error)
-    
-    let errorMessage = 'Error al procesar el archivo'
-    
-    // Capturar todos los tipos de errores posibles
-    if (error.response) {
-      // Error de respuesta del servidor
-      errorMessage = error.response.data?.message || 
-                    error.response.data?.msg || 
-                    error.response.data?.error ||
-                    `Error del servidor: ${error.response.status}`
-    } else if (error.request) {
-      // Error de red o no hay respuesta del servidor
-      errorMessage = 'Error de conexión. Verifique su red y el servidor.'
-    } else {
-      // Error en la configuración de la petición
-      errorMessage = error.message || 'Error desconocido'
-    }
-
-    $q.notify({
-      type: 'negative',
-      message: errorMessage,
-      timeout: 5000
-    })
-  } finally {
-    uploadingFile.value = false
-  }
-}
-
-// Columnas de la tabla
 const columns = [
   { name: 'company_nit', label: 'NIT', field: 'company_nit', sortable: true, align: 'left' },
   { name: 'name', label: 'Nombre', field: 'name', sortable: true, align: 'left' },
   { name: 'legal_representative_email', label: 'Email', field: 'legal_representative_email', sortable: true, align: 'left' },
   { name: 'legal_representative_phone', label: 'Teléfono', field: 'legal_representative_phone', sortable: true, align: 'left' },
-  { name: 'status', label: 'Estado', field: 'status', sortable: true, align: 'left' },
+  { name: 'status', label: 'Estado', field: 'status', sortable: true, align: 'center' },
   { name: 'acciones', label: 'Acciones', field: 'acciones', align: 'center' }
 ]
 
-// Empresas filtradas
 const filteredEmpresas = computed(() => {
-  if (!Array.isArray(empresas.value)) {
-    console.warn('empresas.value no es un array:', empresas.value)
-    return []
-  }
+  if (!Array.isArray(empresas.value)) return []
 
   let filtered = [...empresas.value]
   
-  // Filtrar por búsqueda
   if (search.value) {
     const searchLower = search.value.toLowerCase()
     filtered = filtered.filter(empresa => {
       if (!empresa) return false
-      const nameMatch = empresa.name ? empresa.name.toLowerCase().includes(searchLower) : false
-      const nitMatch = empresa.company_nit ? empresa.company_nit.toLowerCase().includes(searchLower) : false
+      const nameMatch = empresa.name ? empresa.name.toLowerCase().startsWith(searchLower) : false
+      const nitMatch = empresa.company_nit ? empresa.company_nit.toLowerCase().startsWith(searchLower) : false
       return nameMatch || nitMatch
     })
   }
   
-  // Filtrar por estado
   if (filter.value !== 'all') {
     filtered = filtered.filter(empresa => empresa.status === filter.value)
   }
@@ -685,14 +609,13 @@ const filteredEmpresas = computed(() => {
   return filtered
 })
 
-// Cargar empresas
-onMounted(async () => {
-  await cargarEmpresas()
-})
+const verDetalles = (empresa) => {
+  selectedEmpresa.value = empresa
+  detailsModalRef.value?.openDialog()
+}
 
-// Función para detectar cambios en el formulario
 const watchFormChanges = () => {
-  if (!originalFormData.value || !editFormData.value) return false;
+  if (!originalFormData.value || !editFormData.value) return false
   
   const fields = [
     'location',
@@ -700,16 +623,15 @@ const watchFormChanges = () => {
     'legal_representative_position',
     'legal_representative_phone',
     'legal_representative_email'
-  ];
+  ]
 
   return fields.some(field => 
     editFormData.value[field] !== originalFormData.value[field]
-  );
-};
+  )
+}
 
-// Función para obtener los cambios realizados
 const getChanges = () => {
-  if (!originalFormData.value || !editFormData.value) return [];
+  if (!originalFormData.value || !editFormData.value) return []
   
   const fieldLabels = {
     'location': 'Ubicación',
@@ -717,9 +639,9 @@ const getChanges = () => {
     'legal_representative_position': 'Cargo',
     'legal_representative_phone': 'Teléfono',
     'legal_representative_email': 'Email'
-  };
+  }
 
-  const changes = [];
+  const changes = []
   
   Object.keys(fieldLabels).forEach(field => {
     if (editFormData.value[field] !== originalFormData.value[field]) {
@@ -727,47 +649,42 @@ const getChanges = () => {
         label: fieldLabels[field],
         old: originalFormData.value[field],
         new: editFormData.value[field]
-      });
+      })
     }
-  });
+  })
 
-  return changes;
-};
+  return changes
+}
 
-// Función para manejar el cierre del modal
 const handleModalClose = () => {
   if (hasChanges.value) {
-    editFormData.value = { ...originalFormData.value };
+    editFormData.value = { ...originalFormData.value }
   }
-  hasChanges.value = false;
-};
+  hasChanges.value = false
+}
 
-// Funciones para el manejo de la edición
 const handleUpdate = () => {
   if (watchFormChanges()) {
-    showConfirmModal.value = true;
+    confirmModalRef.value?.openDialog()
   }
-};
+}
 
 const confirmUpdate = async () => {
-  showConfirmModal.value = false;
-  await updateCompany();
-};
+  confirmModalRef.value?.closeDialog()
+  await updateCompany()
+}
 
 const cancelEdit = () => {
-  showEditModal.value = false;
-};
+  editModalRef.value?.closeDialog()
+}
 
-// Watch para detectar cambios en el formulario
 watch(() => editFormData.value, () => {
-  hasChanges.value = watchFormChanges();
-}, { deep: true });
+  hasChanges.value = watchFormChanges()
+}, { deep: true })
 
-// Funciones CRUD
 const createCompany = async () => {
   try {
     saving.value = true
-    console.log('Datos del formulario:', formData.value)
     
     const empresaData = {
       company_nit: formData.value.company_nit,
@@ -779,19 +696,18 @@ const createCompany = async () => {
       legal_representative_position: formData.value.legal_representative_position
     }
     
-    console.log('Datos a enviar:', empresaData)
-  const response = await apiClient.post('/companies/saveCompanies', empresaData)
-  console.log('Respuesta del servidor:', response)
+    await apiClient.post('/companies/saveCompanies', empresaData)
+    
     $q.notify({
       type: 'positive',
       message: 'Empresa creada exitosamente'
     })
-    showCreateModal.value = false
+    
+    createModalRef.value?.closeDialog()
     resetForm()
     await cargarEmpresas()
   } catch (error) {
-    console.error('Error al crear la empresa:', error)
-    const errorMessage = error?.response?.data?.errors?.[0] || 'Error al crear la empresa';
+    const errorMessage = error?.response?.data?.errors?.[0] || 'Error al crear la empresa'
     $q.notify({
       type: 'negative',
       message: errorMessage
@@ -801,7 +717,6 @@ const createCompany = async () => {
   }
 }
 
-// Modificar la función resetForm para asegurarnos que limpia todos los campos
 const resetForm = () => {
   formData.value = {
     company_nit: '',
@@ -815,67 +730,40 @@ const resetForm = () => {
   }
 }
 
-// Añadir un watcher para el modal de creación
-watch(() => showCreateModal.value, (newValue) => {
-  if (!newValue) { // Cuando el modal se cierra
-    resetForm()
-  }
-})
+watch(() => editFormData.value, () => {
+  hasChanges.value = watchFormChanges()
+}, { deep: true })
 
-// Funciones de carga inicial
 const cargarEmpresas = async () => {
   try {
     loading.value = true
-    empresas.value = [] // Inicializar como array vacío
+    empresas.value = []
     
-    // Verificar autenticación
-    const auth = JSON.parse(localStorage.getItem('auth') || '{}')
-    
-    
-    if (!auth.token) {
-      throw new Error('No hay token de autenticación')
-    }
-
     const response = await apiClient.get('/companies/listCompanies')
     
-
-    // Manejar diferentes formatos de respuesta posibles
     let data = []
     const payload = response?.data
-    
     
     if (payload?.companies && Array.isArray(payload.companies)) {
       data = payload.companies
     } else if (payload?.data && Array.isArray(payload.data)) {
       data = payload.data
-
     } else if (payload?.msg && Array.isArray(payload.msg)) {
       data = payload.msg
-
     } else if (Array.isArray(payload)) {
       data = payload
-
-    } else {
-
     }
     
     empresas.value = Array.isArray(data) ? data : []
-
     
     if (empresas.value.length === 0) {
       $q.notify({
         type: 'warning',
         message: 'No hay empresas registradas'
       })
-    } else {
-      $q.notify({
-        type: 'positive',
-        message: `${empresas.value.length} empresas cargadas exitosamente`
-      })
     }
     
-} catch (error) {
-
+  } catch (error) {
     empresas.value = []
     
     let errorMessage = 'Error al cargar las empresas'
@@ -884,14 +772,8 @@ const cargarEmpresas = async () => {
       errorMessage = 'No autorizado. Por favor, inicia sesión nuevamente.'
     } else if (error.response?.status === 403) {
       errorMessage = 'No tienes permisos para ver las empresas'
-    } else if (error.response?.status === 404) {
-      errorMessage = 'Endpoint no encontrado'
     } else if (error.response?.data?.msg) {
       errorMessage = error.response.data.msg
-    } else if (error.response?.data?.message) {
-      errorMessage = error.response.data.message
-    } else if (error.message) {
-      errorMessage = error.message
     }
     
     $q.notify({
@@ -902,8 +784,6 @@ const cargarEmpresas = async () => {
     loading.value = false
   }
 }
-
-
 
 const updateCompany = async () => {
   try {
@@ -917,15 +797,17 @@ const updateCompany = async () => {
       legal_representative_email: editFormData.value.legal_representative_email,
       legal_representative_position: editFormData.value.legal_representative_position
     }
-  await apiClient.put(`/companies/updateCompanies/${editFormData.value._id}`, updateData)
+    
+    await apiClient.put(`/companies/updateCompanies/${editFormData.value._id}`, updateData)
+    
     $q.notify({
       type: 'positive',
       message: 'Empresa actualizada exitosamente'
     })
+    
     await cargarEmpresas()
-    showEditModal.value = false
+    editModalRef.value?.closeDialog()
   } catch (error) {
-    console.error('Error al actualizar la empresa:', error)
     $q.notify({
       type: 'negative',
       message: 'Error al actualizar la empresa: ' + (error.response?.data?.message || error.message)
@@ -939,34 +821,56 @@ const openEditModal = (empresa) => {
   editFormData.value = { ...empresa }
   originalFormData.value = { ...empresa }
   hasChanges.value = false
-  showEditModal.value = true
+  
+  // Parsear location para llenar los selects
+  if (empresa.location && empresa.location.includes(',')) {
+    const [city, dept] = empresa.location.split(',').map(s => s.trim())
+    selectedDepartamento.value = dept
+    selectedCiudad.value = city
+  }
+  
+  editModalRef.value?.openDialog()
 }
 
-const editarEmpresa = (empresa) => {
-  editingEmpresa.value = { ...empresa }
-  showEditModal.value = true
+const openCreateModal = () => {
+  // Limpiar los selects
+  selectedDepartamento.value = ''
+  selectedCiudad.value = ''
+  
+  // Limpiar el formulario
+  formData.value = {
+    company_nit: '',
+    name: '',
+    location: '',
+    legal_representative_name: '',
+    legal_representative_position: '',
+    legal_representative_email: '',
+    legal_representative_phone: ''
+  }
+  
+  createModalRef.value?.openDialog()
 }
 
 const desactivarEmpresa = async (id) => {
   try {
     loading.value = true
-  const response = await apiClient.put(`/companies/inactiveCompanies/${id}`)
+    const response = await apiClient.put(`/companies/inactiveCompanies/${id}`)
 
     if (response?.data) {
       const empresaActualizada = response.data
-      // Actualizar la empresa en el arreglo local
       const index = empresas.value.findIndex(e => e._id === id)
       if (index !== -1) {
         empresas.value[index] = empresaActualizada
       }
     }
+    
     await cargarEmpresas()
+    
     $q.notify({
       type: 'positive',
       message: 'Empresa desactivada exitosamente'
     })
   } catch (error) {
-
     $q.notify({
       type: 'negative',
       message: `Error al desactivar la empresa: ${error.response?.data?.message || error.message}`
@@ -978,8 +882,9 @@ const desactivarEmpresa = async (id) => {
 
 const activarEmpresa = async (id) => {
   try {
-  await apiClient.put(`/companies/activeCompanies/${id}`)
+    await apiClient.put(`/companies/activeCompanies/${id}`)
     await cargarEmpresas()
+    
     $q.notify({
       type: 'positive',
       message: 'Empresa activada correctamente'
@@ -992,18 +897,136 @@ const activarEmpresa = async (id) => {
   }
 }
 
+// Funciones para carga masiva
+const cancelUpload = () => {
+  uploadFile.value = null
+  uploadModalRef.value?.closeDialog()
+}
 
+const onFileRejected = (rejectedEntries) => {
+  const reason = rejectedEntries[0].failedPropValidation
+  let message = 'Archivo rechazado'
+  
+  if (reason === 'max-file-size') {
+    message = 'El archivo supera el tamaño máximo permitido de 5MB'
+  } else if (reason === 'accept') {
+    message = 'Formato de archivo no permitido. Use Excel (.xlsx, .xls) o CSV (.csv)'
+  }
+  
+  $q.notify({
+    type: 'negative',
+    message: message
+  })
+}
 
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+}
+
+const uploadMassiveCompanies = async () => {
+  if (!uploadFile.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'Por favor selecciona un archivo'
+    })
+    return
+  }
+
+  try {
+    saving.value = true
+
+    // Preparar FormData con el campo que espera el backend
+    const fileToSend = uploadFile.value
+    const formData = new FormData()
+    formData.append('archivo', fileToSend, fileToSend.name)
+
+    // Token actualizado
+    const auth = JSON.parse(localStorage.getItem('auth') || '{}')
+
+    // Enviar con fetch (multipart nativo del navegador)
+    const resp = await fetch('https://repfora-ep-backend.onrender.com/api/companies/loadMassiveCompanie', {
+      method: 'POST',
+      headers: {
+        'x-token': auth?.token || ''
+      },
+      body: formData
+    })
+
+    const data = await resp.json().catch(() => ({}))
+    if (!resp.ok) {
+      throw { response: { status: resp.status, data } }
+    }
+
+     // Extraer el conteo de empresas de diferentes posibles ubicaciones en la respuesta
+    const count = data?.count || data?.data?.count || data?.companiesCreated || data?.total || 0
+    
+    // Construir el mensaje
+    let message = data?.message || data?.msg || 'Carga masiva exitosa'
+    
+    // Si el mensaje del servidor no incluye el conteo, agregarlo
+    if (count > 0 && !message.includes(count.toString())) {
+      message = `${message}. ${count} empresa${count !== 1 ? 's' : ''} importada${count !== 1 ? 's' : ''}.`
+    }
+    
+    $q.notify({
+      type: 'positive',
+      message: message,
+      timeout: 3000
+    })
+    
+    uploadFile.value = null
+    uploadModalRef.value?.closeDialog()
+    await cargarEmpresas()
+    
+  } catch (error) {
+    const status = error?.response?.status
+    const payload = error?.response?.data || {}
+
+    let errorMessage = 'Error al cargar el archivo.'
+    let caption = undefined
+
+    if (status === 400 && (payload?.msg || payload?.message)) {
+      errorMessage = payload?.msg || payload?.message
+    } else if (status === 500) {
+      errorMessage = 'Error interno del servidor'
+    } else if (payload?.error) {
+      errorMessage = payload.error
+    } else if (error?.message) {
+      errorMessage = error.message
+    }
+
+    $q.notify({ type: 'negative', message: errorMessage, caption, timeout: 6000 })
+  } finally {
+    saving.value = false
+  }
+}
+
+// Watchers para sincronizar departamento y ciudad con location
+watch([selectedDepartamento, selectedCiudad], ([dept, city]) => {
+  if (dept && city) {
+    const locationValue = `${city}, ${dept}`
+    formData.value.location = locationValue
+    if (editFormData.value) {
+      editFormData.value.location = locationValue
+    }
+  }
+})
+
+onMounted(async () => {
+  await cargarEmpresas()
+})
 </script>
 
 <style scoped>
-/* Layout y contenedores */
 .container {
   max-width: 1400px;
   margin: 0 auto;
 }
 
-/* Estilos de modales */
 .modal-card {
   width: 1000px;
   max-width: 90vw;
@@ -1021,7 +1044,17 @@ const activarEmpresa = async (id) => {
   padding: 32px 40px;
 }
 
-/* Títulos y encabezados */
+.detail-content {
+  min-width: 800px;
+  max-width: 1200px;
+}
+
+.separator-custom {
+  background-color: #39a900;
+  height: 2px;
+  opacity: 0.5;
+}
+
 .section-title {
   color: #39a900;
   font-weight: 600;
@@ -1039,7 +1072,13 @@ const activarEmpresa = async (id) => {
   font-size: 2.2rem;
 }
 
-/* Grids y datos */
+.company-title {
+  color: white !important;
+  font-weight: 700;
+  text-align: center;
+  font-size: 1.8rem;
+}
+
 .data-grid {
   display: grid;
   gap: 16px;
@@ -1056,7 +1095,6 @@ const activarEmpresa = async (id) => {
   align-items: center;
 }
 
-/* Textos y tipografía */
 .text-weight-bold {
   color: #2c3e50;
   font-size: 0.95rem;
@@ -1068,75 +1106,45 @@ const activarEmpresa = async (id) => {
   font-size: 0.95rem;
 }
 
-/* Elementos UI */
-.q-badge {
-  padding: 4px 8px;
+.change-item {
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  border-left: 3px solid #39a900;
 }
 
-/* Separadores */
+.change-values {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  padding: 8px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.old-value {
+  color: #e74c3c;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.new-value {
+  color: #39a900;
+  font-weight: 600;
+}
+
 :deep(.q-separator) {
   background-color: #39a900;
   height: 2px;
   opacity: 0.5;
 }
 
-/* Tabla */
-.q-table__card {
-  box-shadow: none;
+:deep(.q-card) {
+  min-width: 900px;
+  max-width: 98vw;
 }
 
-/* Estilos para carga masiva PDF (maquetado) */
-.hidden-file-input {
-  display: none;
-}
-
-.text-orange {
-  color: #ff8c00;
-}
-
-.hidden-file-input {
-  display: none;
-}
-
-.upload-area {
-  width: 100%;
-  min-height: 140px;
-  border: 2px dashed rgba(0,0,0,0.12);
-  border-radius: 8px;
-  background-color: #fafafa;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-
-.upload-area.upload-active {
-  background-color: #f0f9ff;
-  border-color: #66b2ff;
-}
-
-.upload-label {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  justify-content: center;
-  text-align: center;
-}
-
-.upload-icon q-icon,
-.upload-icon {
-  color: rgba(0,0,0,0.5);
-}
-
-.bulk-upload-box {
-  padding: 12px;
-  border-radius: 8px;
-  background-color: #f7f8fa;
-  border: 1px solid rgba(0,0,0,0.03);
-}
-
-.file-list .text-caption {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+:deep(.q-dialog__inner) {
+  padding: 16px;
 }
 </style>

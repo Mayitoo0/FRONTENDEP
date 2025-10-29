@@ -1,5 +1,7 @@
 <template>
+      <BackButton />
   <div class="center" style="margin-top: 20px;">
+
     <div class="grid">
       <Card
         title="HORAS INSTRUCTORES" 
@@ -63,7 +65,7 @@
   </div>
 </template>
 <script setup>
-
+import BackButton from '../../components/BackButton.vue';
 import Card from 'src/components/cards/MenuCard.vue';
 
 </script>

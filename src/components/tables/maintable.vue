@@ -62,6 +62,17 @@ const pagination = ref({
           />
         </q-td>
       </template>
+
+      <!-- Estado con status numérico (0 = Activo, 1 = Inactivo) -->
+      <template #body-cell-status="props">
+        <q-td :props="props" class="text-center">
+          <q-badge
+            :color="props.row.status === 0 ? 'green' : 'red'"
+            :label="props.row.status === 0 ? 'Activo' : 'Inactivo'"
+            class="text-uppercase"
+          />
+        </q-td>
+      </template>
       
       <!-- Acciones por defecto -->
       <template #body-cell-acciones="props">
