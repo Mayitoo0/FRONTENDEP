@@ -2,9 +2,12 @@
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="text-white custom-header">
       <div class="header-container">
+        <div class="row items-center" style="gap:8px;">
+          <q-btn flat round dense icon="menu" color="white" aria-label="Menú" @click="leftDrawerOpen = !leftDrawerOpen" />
         <q-avatar class="header-avatar">
           <img src="/src/assets/logoSENABlanco.png" alt="logo SENA" />
         </q-avatar>
+        </div>
         <span class="header-title">REPFORA EP</span>
         <div class="header-action-btn">
           <q-btn fab color="white" size="lg" @click="showMorph = !showMorph" unelevated>
@@ -13,6 +16,35 @@
         </div>
       </div>
     </q-header>
+
+    <!-- Drawer SIMPLE: se abre/cierra con el botón hamburguesa -->
+    <q-drawer v-model="leftDrawerOpen" side="left" bordered :width="260" content-class="bg-white">
+      <div class="drawer-header">
+        <q-avatar class="drawer-avatar">
+          <img src="/src/assets/images/logo-sena copy.png" alt="logo SENA" />
+        </q-avatar>
+        <div class="drawer-user">
+          <div class="text-subtitle1 text-weight-bold">{{ firstName || 'Usuario' }}</div>
+          <div class="text-caption">{{ roleLabel }}</div>
+        </div>
+      </div>
+      <q-separator color="green-5" />
+      <q-scroll-area style="height: calc(100% - 116px);">
+        <!-- Lista mínima de navegación por rol -->
+        <q-list padding separator>
+          <template v-for="item in navItems" :key="item.to">
+            <q-item clickable v-ripple @click="go(item.to)" class="drawer-item">
+              <q-item-section avatar>
+                <q-icon :name="item.icon" color="grey-7" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ item.label }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-list>
+      </q-scroll-area>
+    </q-drawer>
 
     <transition name="fade">
       <div v-if="showMorph" class="morph-float-card">
@@ -113,12 +145,61 @@ import { useQuasar } from 'quasar'
 import { useAuthStore } from '../stores/authStore.js'
 
 const showMorph = ref(false)
+const leftDrawerOpen = ref(false)
 const firstName = ref('')
 const lastName = ref('')
 const role = ref('')
 const router = useRouter()
 const $q = useQuasar()
 const authStore = useAuthStore()
+
+const roleLabel = computed(() => {
+  if (Array.isArray(role.value)) {
+    return role.value.join(' ')
+  }
+  return role.value || 'Sin rol'
+})
+// Ítems de navegación mínimos por rol (sin captions, sin búsqueda)
+const navItems = computed(() => {
+  const isAdmin = role.value === 'ETAPA PRODUCTIVA VIRTUAL' || role.value === 'ETAPA PRODUCTIVA PRESENCIAL' || role.value === 'ADMINISTRADOR'
+  const isInstructor = (Array.isArray(role.value) && role.value[0] === 'INSTRUCTOR') || role.value === 'INSTRUCTOR'
+  const isAprendiz = role.value === 'APRENDIZ'
+
+  if (isAdmin) {
+    return [
+      { label: 'Inicio', icon: 'home', to: '/app/inicio' },
+      { label: 'Empresas', icon: 'business', to: '/app/admin/empresas' },
+      { label: 'Documentos', icon: 'folder', to: '/app/admin/buscar-ficha' },
+      { label: 'Instructores', icon: 'group', to: '/app/admin/instructores' },
+      { label: 'Fichas', icon: 'ballot', to: '/app/admin/fichas' },
+      { label: 'Parámetros', icon: 'tune', to: '/app/admin/parametros' },
+      { label: 'Reportes', icon: 'insights', to: '/app/admin/reportes' }
+    ]
+  }
+  if (isInstructor) {
+    return [
+      { label: 'Inicio', icon: 'home', to: '/app/inicio' },
+      { label: 'Informe Personal', icon: 'badge', to: '/app/instructor/informepersonal' },
+      { label: 'Seguimientos', icon: 'visibility', to: '/app/instructor/seguimientos' },
+      { label: 'Bitácoras', icon: 'description', to: '/app/instructor/bitacoras' },
+      { label: 'Mis Aprendices', icon: 'people', to: '/app/instructor/misaprendices' }
+    ]
+  }
+  if (isAprendiz) {
+    return [
+      { label: 'Inicio', icon: 'home', to: '/app/aprendiz/inicio' },
+      { label: 'Bitácoras', icon: 'description', to: '/app/aprendiz/bitacoras' },
+      { label: 'Datos Personales', icon: 'person', to: '/app/aprendiz/datospersonales' },
+      { label: 'Mis Registros', icon: 'fact_check', to: '/app/aprendiz/misregistros' }
+    ]
+  }
+  return []
+})
+
+function go(to) {
+  router.push(to)
+  leftDrawerOpen.value = false
+}
 
 
 // NOTIFICACIONES 
@@ -174,6 +255,10 @@ onMounted(() => {
       const Names = Auth.user.name.split(" ")
       firstName.value = Names[0]
       lastName.value = Names[1]
+    }
+    role.value = Auth.user.role
+    if(role.value == "INSTRUCTOR OWNER" || role.value == 'INSTRUCTOR'){
+      role.value = role.value.split(" ")
     }
   }
 })
@@ -476,5 +561,33 @@ const logout = () => {
 /* Z-INDEX MANAGEMENT */
 .q-footer {
   z-index: 1000;
+}
+
+/* DRAWER THEME */
+.drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #ffffff;
+  color: #111111;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.drawer-avatar {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.drawer-user .text-caption {
+  opacity: 0.9;
+}
+
+.drawer-item:hover {
+  background-color: #f5f7f5;
+}
+
+.drawer-item.q-item--active {
+  background-color: #eef5ee;
 }
 </style>

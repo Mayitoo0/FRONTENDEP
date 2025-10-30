@@ -61,8 +61,7 @@ import { getData, putData } from 'src/services/apiClient.js';
 import { ref, onMounted } from 'vue';
 import modalComponent from 'src/components/modals/modalComponent.vue';
 import maintable from 'src/components/tables/maintable.vue';
-import ModalButton from 'src/components/ModalButton.vue';
-import ModalConfirm from 'src/components/modals/modal_confirm.vue';
+
 
 
 const rows = ref([])

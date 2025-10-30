@@ -1,6 +1,7 @@
 <template>
   <div class="page-content">
-    <BackButton/>
+  <!-- Forzar que la flecha lleve siempre al inicio del area de aprendiz -->
+  <BackButton :disabled="showDialog || showConfirm" to="/app/aprendiz/inicio" />
 
     <div class="registro-container">
     <div class="text-center q-mb-xl">
@@ -32,7 +33,10 @@
 
     <div v-if="fechaConfirmada" class="fecha-container">
       <div class="fecha-confirmada">
-        <strong>Fecha de inicio:</strong> {{ fechaConfirmada }}
+        <strong>Fecha de inicio:</strong>
+        <span class="q-ml-sm">{{ fechaConfirmada }}</span>
+        <!-- Botón para volver a abrir el modal y cambiar la fecha -->
+        <q-btn flat dense icon="edit" class="q-ml-sm" @click="openChangeDate" aria-label="Cambiar fecha" />
       </div>
     </div>
 
@@ -86,11 +90,19 @@
         color="#5db82f"
         textColor="white"
       />
+      <Card
+        title="Proyecto Productivo"
+        subtitle="Registra tu proyecto productivo"
+        imgSrc="/src/assets/Contrato_Aprendizaje.jpg"
+        route="/app/aprendiz/modalidadesEP/proyectoproductivo"
+        color="#5db82f"
+        textColor="white"
+      />
     </div>
   </div>
 
   <!--MODAL PRINCIPAL -->
-  <modalComponent ref="dialogRef">
+  <modalComponent ref="dialogRef" v-model="showDialog">
     <template #header>
       <div class="text-center">
         <q-icon name="event" color="white" size="2.5rem" class="q-mb-sm" />
@@ -119,13 +131,14 @@
 
     <template #footer>
       <div class="row justify-end q-gutter-md full-width">
+        <BotonCerrar label="Cancelar" @click="showDialog = false" />
         <BotonEnviar label="Calcular Fecha" @click="calcularFecha" :disabled="!selectedDate" />
       </div>
     </template>
   </modalComponent>
 
   <!-- MODAL DE CONFIRMACIÓN -->
-  <modalComponent ref="confirmRef">
+  <modalComponent ref="confirmRef" v-model="showConfirm">
     <template #header>
       <div class="text-center">
         <div class="text-h6 text-weight-bold">
@@ -166,10 +179,24 @@ const selectedDate = ref('')
 const fechaConfirmada = ref('')
 const dialogRef = ref(null)
 const confirmRef = ref(null)
+// Estados reactivos para controlar modales y desactivar el BackButton cuando estén abiertos
+const showDialog = ref(false)
+const showConfirm = ref(false)
 
 onMounted(async () => {
   await nextTick()
-  dialogRef.value?.openDialog()
+  // Comportamiento deseado:
+  // - Si ya hay una fecha confirmada guardada (localStorage), no volver a pedirla al entrar a la vista.
+  // - Si no hay fecha guardada, abrir el diálogo para pedirla.
+  const saved = localStorage.getItem('registroEP_fechaConfirmada')
+  if (saved) {
+    // Recuperar la fecha previamente confirmada y no mostrar el modal
+    fechaConfirmada.value = saved
+    showDialog.value = false
+  } else {
+    // No hay fecha guardada: abrir el diálogo para pedirla
+    showDialog.value = true
+  }
 })
 
 // Calcular fecha
@@ -183,21 +210,41 @@ const calcularFecha = () => {
     return
   }
 
-  dialogRef.value?.closeDialog()
-  confirmRef.value?.openDialog()
+  // Cerrar diálogo y abrir confirmación usando los flags reactivos
+  showDialog.value = false
+  showConfirm.value = true
 }
 
 // Confirmar fecha
 const confirmarFecha = () => {
   const fechaInicio = selectedDate.value
   fechaConfirmada.value = fechaInicio.split('-').reverse().join('/')
-  confirmRef.value?.closeDialog()
+  // Guardar la fecha confirmada en localStorage para no volver a pedirla
+  localStorage.setItem('registroEP_fechaConfirmada', fechaConfirmada.value)
+  showConfirm.value = false
   currentStep.value = 2
 }
 
 // Cerrar modal confirmación
 const cerrarConfirmacion = () => {
-  confirmRef.value?.closeDialog()
+  showConfirm.value = false
+}
+
+// Abrir el modal para cambiar la fecha ya confirmada
+function openChangeDate () {
+  if (fechaConfirmada.value) {
+    // fechaConfirmada está en formato dd/mm/yyyy -> convertir a yyyy-mm-dd para el input[type=date]
+    const parts = fechaConfirmada.value.split('/')
+    if (parts.length === 3) {
+      const yyyy = parts[2]
+      const mm = parts[1].padStart(2, '0')
+      const dd = parts[0].padStart(2, '0')
+      selectedDate.value = `${yyyy}-${mm}-${dd}`
+    }
+  }
+  // Abrir diálogo para edición
+  showConfirm.value = false
+  showDialog.value = true
 }
 </script>
 

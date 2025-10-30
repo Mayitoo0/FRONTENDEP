@@ -2,15 +2,7 @@
   <div class="vista-documentos-page">
     <!-- Header con flecha de retroceso y título centrado -->
     <div class="header">
-      <q-btn
-        flat
-        round
-        icon="arrow_back"
-        color="green-7"
-        size="sm"
-        @click="goBack"
-        class="back-btn"
-      />
+      <BackButton/>
       <h1 class="page-title">VISTA DOCUMENTOS</h1>
       <div class="header-spacer"></div> <!-- Espacio para centrar el título -->
     </div>
@@ -112,6 +104,8 @@ import modalComponent from '@/components/modals/modalComponent.vue'
 import BotonCerrar from '@/components/BotonCerrar.vue'
 import BotonEnviar from '@/components/BotonEnviar.vue'
 import maintable from '@/components/tables/maintable.vue'
+import BackButton from '@/components/BackButton.vue'
+
 
 const router = useRouter()
 const route = useRoute()
@@ -231,14 +225,7 @@ onMounted(() => {
   padding: 0 10px;
 }
 
-.back-btn {
-  flex-shrink: 0;
-}
 
-.header-spacer {
-  width: 40px; /* Mismo ancho que el botón para centrar */
-  flex-shrink: 0;
-}
 
 .page-title {
   font-size: 38px;

@@ -1,3 +1,5 @@
+novedades admin
+
 <template>
   <div class="novedades-container">
     <!-- Botón de regreso -->
@@ -22,16 +24,30 @@
         />
       </div>
     </div>
-
+ <div><p class="text-center">las novedades tienen un plazo máximo de 15 días hábiles para ser resueltas
+  
+</p></div>
     <!-- Vista condicional -->
     <div v-if="!mostrarTabla" class="urgent-cards-container">
-      <CardNovedades
-        :novedades="novedadesUrgentes"
-        :loading="loading"
-        :error-message="errorMessage"
-        @mostrar-tabla="mostrarTabla = true"
-        @clear-error="errorMessage = ''"
-      />
+      <div class="text-weight-bold text-center q-mb-md">Novedades Urgentes</div>
+      <div class="urgent-cards-grid">
+        <CardNovedades
+          v-for="novedad in novedadesUrgentes"
+          :key="novedad.id"
+          :novedades="[novedad]"
+          :loading="loading"
+          :error-message="errorMessage"
+          @clear-error="errorMessage = ''"
+        />
+      </div>
+      <!-- Agregar botón para ver todas las novedades -->
+      <div class="text-center q-mt-xl">
+        <BotonIngresar
+          label="Ver todas las novedades"
+          @click="mostrarTabla = true"
+          class="view-all-button"
+        />
+      </div>
     </div>
     
     <div v-else>
@@ -49,7 +65,7 @@
           </template>
         </q-input>
         <!-- Conectar el botón al método applyFilter -->
-        <Button1 label="Filtrar" size="sm" class="filter-button" @click="applyFilter" />
+        <BotonIngresar label="Filtrar" size="sm" class="filter-button" @click="applyFilter" />
       </div>
 
       <!-- Tabla -->
@@ -76,74 +92,101 @@
         </template>
       </q-table>
 
-      <!-- Diálogo de detalles -->
-      <q-dialog v-model="mostrarDetalles" persistent>
-        <q-card class="detail-card">
-          <q-card-section class="header-section bg-primary text-white">
-            <div class="text-h6">Información General</div>
-            <q-space />
-            <q-btn icon="close" flat round dense v-close-popup class="text-white" />
-          </q-card-section>
+      <!-- Reemplazar el q-dialog de detalles por el nuevo modal -->
+      <modalComponent
+        v-model="mostrarDetalles"
+        width="1200px"
+        max-width="98vw"
+      >
+        <template #header>
+          <div class="text-h6">Detalles de la Novedad</div>
+        </template>
 
-          <q-card-section v-if="novedadSeleccionada" class="detail-content q-pa-lg">
+        <template #body>
+          <div v-if="novedadSeleccionada" class="q-pa-md">
             <div class="row q-col-gutter-lg">
-              <div class="col-12">
-                <div class="info-grid">
-                  <div class="info-item">
-                    <div class="info-label">Aprendiz</div>
-                    <div class="info-value">{{ novedadSeleccionada.aprendiz }}</div>
+              <!-- Columna Izquierda -->
+              <div class="col-12 col-md-6">
+                <div class="text-h6 q-mb-md section-title">Información del Aprendiz</div>
+                <div class="data-grid">
+                  <div class="data-row">
+                    <div class="text-weight-bold">Nombre:</div>
+                    <div class="data-value">{{ novedadSeleccionada.aprendiz }}</div>
                   </div>
-
-                  <div class="info-item">
-                    <div class="info-label">Tipo</div>
-                    <div class="info-value">{{ novedadSeleccionada.tipo }}</div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Documento:</div>
+                    <div class="data-value">{{ novedadSeleccionada.documento }}</div>
                   </div>
-
-                  <div class="info-item">
-                    <div class="info-label">Instructor</div>
-                    <div class="info-value">{{ novedadSeleccionada.instructor }}</div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Ficha:</div>
+                    <div class="data-value">{{ novedadSeleccionada.ficha }}</div>
                   </div>
-
-
-                  <div class="info-item">
-                    <div class="info-label">Ficha</div>
-                    <div class="info-value">{{ novedadSeleccionada.ficha }}</div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Programa:</div>
+                    <div class="data-value">{{ novedadSeleccionada.programa }}</div>
                   </div>
+                </div>
 
+                <div class="text-h6 q-mb-md section-title q-mt-lg">Descripción de la Novedad</div>
+                <div class="data-grid">
+                  <div class="data-row">
+                    <div class="text-weight-bold">Tipo:</div>
+                    <div class="data-value">{{ novedadSeleccionada.tipo }}</div>
+                  </div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Descripción:</div>
+                    <div class="data-value">{{ novedadSeleccionada.descripcion || 'Sin descripción' }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Columna Derecha -->
+              <div class="col-12 col-md-6">
+                <div class="text-h6 q-mb-md section-title">Estado y Seguimiento</div>
+                <div class="data-grid">
+                  <div class="data-row">
+                    <div class="text-weight-bold">Estado:</div>
+                    <div class="data-value">{{ novedadSeleccionada.estado }}</div>
+                  </div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Gravedad:</div>
+                    <div class="data-value">{{ novedadSeleccionada.gravedad }}</div>
+                  </div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Instructor:</div>
+                    <div class="data-value">{{ novedadSeleccionada.instructor }}</div>
+                  </div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Tiempo transcurrido:</div>
+                    <div class="data-value">{{ tiempoTranscurrido(novedadSeleccionada.fecha) }}</div>
+                  </div>
+                </div>
+
+                <div v-if="novedadSeleccionada.respuestas?.length" class="text-h6 q-mb-md section-title q-mt-lg">
+                  Respuestas
+                  <div class="data-grid">
+                    <div v-for="(respuesta, idx) in novedadSeleccionada.respuestas" :key="idx" class="data-row">
+                      <div class="text-weight-bold">Respuesta {{idx + 1}}:</div>
+                      <div class="data-value">{{ respuesta }}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </q-card-section>
+          </div>
+        </template>
 
-          <q-separator />
-
-          <q-card-actions align="right" class="bg-grey-1 q-pa-md q-gutter-sm">
-            <q-btn 
-              label="Cerrar" 
-              color="grey-7" 
-              v-close-popup 
-              flat
-              class="q-px-lg"
-            />
-            <q-btn 
-              label="Ver" 
-              color="positive" 
-              @click="verCompleto(novedadSeleccionada)"
-              class="q-px-lg"
-            />
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-
-      <!-- Agregar el Modal después del diálogo de detalles -->
-      <ModalNew
-        v-model="mostrarModalNew"
-        :novedad="novedadSeleccionada"
-      />
+        <template #footer>
+          <BotonCerrar
+            label="Cerrar"
+            @click="mostrarDetalles = false"
+          />
+        </template>
+      </modalComponent>
 
       <!-- Botón volver -->
       <div class="row justify-center q-mt-lg">
-        <Button1
+        <BotonIngresar
           label="Volver a novedades urgentes"
           @click="mostrarTabla = false"
           class="button-wide"
@@ -158,9 +201,10 @@ import { ref, onMounted, computed } from 'vue'
 import { apiClient } from '@/plugins/pluginAxios.js'
 import CardNovedades from '@/components/CardNovedades.vue'
 import StatsCard from '@/components/cards/StatsCard.vue'
-import Button1 from '@/components/button-1.vue'
-import ModalNew from '@/components/modals/ModalNew.vue'
+import BotonIngresar from '@/components/BotonIngresar.vue'
+import BotonCerrar from '@/components/BotonCerrar.vue'
 import BackButton from '@/components/BackButton.vue'
+import modalComponent from '@/components/modals/modalComponent.vue'
 
 
 const loading = ref(false)
@@ -180,7 +224,6 @@ const mostrarDetalles = ref(false)
 const novedadSeleccionada = ref(null)
 const mostrarModalNew = ref(false)
 
-// Columnas para la tabla
 const columns = [
   { 
     name: 'fecha', 
@@ -193,14 +236,26 @@ const columns = [
     name: 'aprendiz', 
     align: 'left', 
     label: 'Aprendiz', 
-    field: row => `${row.aprendiz} - ${row.documento}`,
+    field: 'aprendiz',
     style: 'width: 150px'
+  },
+  { 
+    name: 'cedula', 
+    align: 'left', 
+    label: 'Cédula', 
+    field: 'documento'
   },
   { 
     name: 'ficha', 
     align: 'left', 
-    label: 'Ficha/Programa', 
-    field: row => `${row.ficha} - ${row.programa}`
+    label: 'Ficha', 
+    field: 'ficha'
+  },
+  {
+    name: 'programa',
+    align: 'left',
+    label: 'Programa',
+    field: 'programa'
   },
   { 
     name: 'tipo', 
@@ -237,17 +292,35 @@ const columns = [
 // Computed property para filtrar novedades urgentes
 const novedadesUrgentes = computed(() => {
   const urgentes = novedades.value.filter(n => n.prioridad === 'urgente' || n.prioridad === 'critica')
-  return urgentes.slice(0, 1) // Retorna solo la primera novedad urgente
+  return urgentes.slice(0, 4) // Retorna las primeras 4 novedades urgentes
 })
 
 function getDays(fecha) {
-  return Math.floor((Date.now() - new Date(fecha).getTime()) / (1000 * 60 * 60 * 24))
+  // Convertir la fecha a objeto Date y establecer la hora a medianoche
+  const fechaNovedad = new Date(fecha)
+  fechaNovedad.setHours(0, 0, 0, 0)
+  
+  // Obtener fecha actual y establecer la hora a medianoche
+  const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0)
+
+  // Calcular la diferencia en milisegundos y convertir a días
+  const diferencia = hoy - fechaNovedad
+  const dias = Math.round(diferencia / (1000 * 60 * 60 * 24))
+  
+  return dias
 }
 
 // Función para calcular tiempo transcurrido
 function tiempoTranscurrido(fecha) {
-  const dias = Math.floor((Date.now() - new Date(fecha).getTime()) / (1000 * 60 * 60 * 24))
-  return dias <= 0 ? 'Hoy' : `Hace ${dias} días`
+  const [dia, mes, anio] = fecha.split('/')
+  const fechaFormateada = `${mes}/${dia}/${anio}`
+  const dias = getDays(fechaFormateada)
+
+  if (dias < 0) return `Faltan ${Math.abs(dias)} días`
+  if (dias === 0) return 'Hoy'
+  if (dias === 1) return 'Hace 1 día'
+  return `Hace ${dias} días`
 }
 
 async function fetchNovedades() {
@@ -309,11 +382,15 @@ function actualizarStats(novedadesArray) {
 function procesarNovedadesParaTabla(novedadesArray) {
   novedades.value = novedadesArray.map(novedad => ({
     id: novedad._id,
-    fecha: new Date(novedad.createdAt).toLocaleDateString(),
+    fecha: new Date(novedad.createdAt).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }),
     aprendiz: novedad.name,
     documento: `${novedad.tpdocument} ${novedad.document}`,
     ficha: novedad.fiche.number ,
-    programa: novedad.coordination || 'Pendiente',
+    programa: novedad.coordination,
     tipo: novedad.tpnew,
     gravedad: novedad.status === 0 ? 'Alta' : 'Baja',
     estado: novedad.state || 'PENDIENTE',
@@ -331,12 +408,10 @@ function verDetalle(novedad) {
   mostrarDetalles.value = true
 }
 
-// Función para ver la novedad completa
-function verCompleto(novedad) {
-  mostrarModalNew.value = true
-  // La novedad ya está en novedadSeleccionada.value
+// Agregar función handleSubmit
+function handleSubmit() {
+  mostrarDetalles.value = false
 }
-
 
 // Reemplazar binding de rows por computed filtrado
 const filteredNovedades = computed(() => {
@@ -449,12 +524,21 @@ onMounted(fetchStats)
   letter-spacing: 1px;
 }
 
+.urgent-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-flow: row;
+  gap: 20px;
+  width: 100%;
+}
+
 .urgent-cards-container {
   margin-top: 48px;
   padding: 24px;
   background-color: #fff3e0;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 /* Estilos para la tabla */
@@ -580,4 +664,82 @@ onMounted(fetchStats)
   padding: 8px 0;
 }
 
+.view-all-button {
+  width: 300px;
+}
+
+/* Ajustes para que el modal tenga estilo similar a la imagen adjunta */
+.modal-sections {
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.section-title {
+  font-weight: 700;
+  color: #197B00;
+  margin-bottom: 8px;
+}
+
+/* footer: alinear botón a la derecha y estilo similar a imagen */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
+
+/* pequeño ajuste para el botón cerrar si necesita espaciado */
+.boton-cerrar {
+  /* si BotonCerrrar acepta class, aquí puedes ajustar ancho/margen */
+  min-width: 120px;
+}
+
+/* Estilos del modal */
+.section-title {
+  color: #39a900;
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  padding-left: 8px;
+  border-left: 4px solid #39a900;
+}
+
+.data-grid {
+  display: grid;
+  gap: 16px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.data-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.text-weight-bold {
+  color: #2c3e50;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.data-value {
+  color: #34495e;
+  font-size: 0.95rem;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .modal-sections { gap: 12px; }
+  .urgent-cards-grid { grid-template-columns: repeat(2, 1fr); }
+}
 </style>

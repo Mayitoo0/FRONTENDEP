@@ -2,14 +2,7 @@
   <div class="buscar-ficha-page">
     <!-- Header con flecha de retroceso -->
     <div class="header">
-      <q-btn
-        flat
-        round
-        icon="arrow_back"
-        color="green-7"
-        size="md"
-        @click="goBack"
-      />
+      <BackButton/>
     </div>
 
     <!-- Contenedor centrado -->
@@ -66,6 +59,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import BackButton from '../../components/BackButton.vue'
 
 const router = useRouter()
 

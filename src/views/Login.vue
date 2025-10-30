@@ -83,7 +83,7 @@
 
             <!-- Botón de ingreso -->
             <div class="row justify-center" style="width: 100%; padding-top: 32px;">
-              <Button1 label="INGRESAR" type="submit" :loading="loading" customClass="wide-btn" />
+              <BotonIngresar label="INGRESAR" type="submit" :loading="loading" customClass="wide-btn" />
             </div>
           </q-form>
         </q-card>
@@ -104,12 +104,12 @@
 </template>
 
 <script setup>
-import Button1 from '../components/button-1.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { postData } from '../services/apiClient.js'
 import { useNotifications } from '../composables/useNotifications.js'
 import { useAuthStore } from '../stores/authStore.js'
+import BotonIngresar from '../components/BotonIngresar.vue'
 
 const router = useRouter()
 
@@ -118,6 +118,26 @@ const showPassword = ref(false)
 const selectedRole = ref(null)
 const notify = useNotifications()
 const authStore = useAuthStore()
+
+function extractErrorMessage(error) {
+  // Intentar varias formas comunes en las que el backend puede devolver mensajes
+  const resp = error?.response?.data
+  if (!resp && typeof error === 'string') return error
+  if (!resp && error?.message) return error.message
+
+  // Priorizar campos comunes
+  if (resp?.message) return resp.message
+  if (resp?.msg) return resp.msg
+
+  // Algunos backends devuelven un arreglo de errores
+  if (resp?.errors) {
+    if (Array.isArray(resp.errors)) return resp.errors.join(', ')
+    if (typeof resp.errors === 'string') return resp.errors
+  }
+
+  // Fallback a un mensaje genérico o al message de la excepción
+  return error?.message || 'Error de autenticación. Verifica tus credenciales.'
+}
 
 // Opciones para el selector de rol
 const roleOptions = [
@@ -160,8 +180,8 @@ const onSubmit = async () => {
           });
         } catch (error) {
           console.error('Error en login de administrador:', error);
-          const errorMessage = error.response?.data?.errors?.[0];
-          notify.error(errorMessage);
+          const errorMessage = extractErrorMessage(error);
+          notify.error(errorMessage || 'Error de autenticación. Verifica tus credenciales.');
           return;
         }
         break;
@@ -175,8 +195,8 @@ const onSubmit = async () => {
           });
         } catch (error) {
           console.error('Error en login de instructor:', error);
-          const errorMessage = error.response?.data?.errors?.[0];
-          notify.error(errorMessage);
+          const errorMessage = extractErrorMessage(error);
+          notify.error(errorMessage || 'Error de autenticación. Verifica tus credenciales.');
           return;
         }
         break;
@@ -190,8 +210,8 @@ const onSubmit = async () => {
           });
         } catch (error) {
           console.error('Error en login de aprendiz:', error);
-          const errorMessage = error.response?.data?.errors?.[0];
-          notify.error(errorMessage);
+          const errorMessage = extractErrorMessage(error);
+          notify.error(errorMessage || 'Error de autenticación. Verifica tus credenciales.');
           return;
         }
         break;

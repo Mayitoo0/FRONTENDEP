@@ -34,12 +34,12 @@
           </div>
           <div class="col-12 col-md-4 text-right">
             <div class="row q-gutter-sm justify-end">
-              <Button1
+              <BotonIngresar
                 label="Carga Masiva"
                 @click="uploadModalRef?.openDialog()"
                 icon="upload_file"
               />
-              <Button1
+              <BotonIngresar
                 label="+ Nueva Empresa"
                 @click="openCreateModal"
               />
@@ -133,8 +133,7 @@
         </template>
 
         <template #footer>
-          <ModalButton
-            type="cancel"
+          <BotonCerrar
             label="Cerrar"
             @click="detailsModalRef?.closeDialog()"
           />
@@ -261,13 +260,11 @@
         </template>
 
         <template #footer>
-          <ModalButton
-            type="cancel"
+          <BotonCerrar
             label="Cancelar"
             @click="createModalRef?.closeDialog()"
           />
-          <ModalButton
-            type="confirm"
+          <BotonEnviar
             label="Crear Empresa"
             @click="createCompany"
             :loading="saving"
@@ -296,13 +293,11 @@
         </template>
 
         <template #footer>
-          <ModalButton
-            type="cancel"
+          <BotonCerrar
             label="Cancelar"
             @click="confirmModalRef?.closeDialog()"
           />
-          <ModalButton
-            type="confirm"
+          <BotonEnviar
             label="Confirmar"
             @click="confirmUpdate"
           />
@@ -422,13 +417,11 @@
         </template>
 
         <template #footer>
-          <ModalButton
-            type="cancel"
+          <BotonCerrar
             label="Cancelar"
             @click="cancelEdit"
           />
-          <ModalButton
-            type="confirm"
+          <BotonEnviar
             label="Editar Empresa"
             @click="handleUpdate"
             :loading="saving"
@@ -478,13 +471,11 @@
         </template>
 
         <template #footer>
-          <ModalButton
-            type="cancel"
+          <BotonCerrar
             label="Cancelar"
             @click="cancelUpload"
           />
-          <ModalButton
-            type="confirm"
+          <BotonEnviar
             label="Cargar Empresas"
             @click="uploadMassiveCompanies"
             :loading="saving"
@@ -501,8 +492,9 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
 
 import BackButton from '../../components/BackButton.vue'
-import ModalButton from '../../components/modals/ModalButton.vue'
-import Button1 from '../../components/button-1.vue'
+import BotonCerrar from '../../components/BotonCerrar.vue'
+import BotonEnviar from '../../components/BotonEnviar.vue'
+import BotonIngresar from '../../components/BotonIngresar.vue'
 import maintable from '../../components/tables/maintable.vue'
 import modalComponent from '../../components/modals/modalComponent.vue'
 
@@ -707,7 +699,8 @@ const createCompany = async () => {
     resetForm()
     await cargarEmpresas()
   } catch (error) {
-    const errorMessage = error?.response?.data?.errors?.[0] || 'Error al crear la empresa'
+    const resp = error?.response?.data;
+    const errorMessage = resp?.message || resp?.msg || (resp?.errors ? (Array.isArray(resp.errors) ? resp.errors.join(', ') : resp.errors) : null) || error?.message || 'Error al crear la empresa'
     $q.notify({
       type: 'negative',
       message: errorMessage

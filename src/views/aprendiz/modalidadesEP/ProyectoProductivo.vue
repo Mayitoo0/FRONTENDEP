@@ -1,10 +1,10 @@
 <template>
-  <div class="pasantia-wrapper">
-  <div class="pasantia-container q-pa-lg">
+  <div class="proyecto-wrapper">
+  <div class="proyecto-container q-pa-lg">
   <BackButton to="/app/aprendiz/registroep" :disabled="saving" />
     <div class="text-center q-mb-lg" >
       <h2 class="text-h5 text-weight-bold text-green-9">
-        Pasantía ONG-Entidad
+        Proyecto Productivo
       </h2>
     </div>
     <div class="text-body1 q-mb-md">
@@ -12,10 +12,10 @@
         A continuación deberá enviar un archivo PDF con los siguientes documentos:
       </p>
       <ul class="q-pl-lg">
-        <li>Convenio o carta de aceptación empresa</li>
-        <li>Certificación ARL (cuando aplique)</li>
-        <li>Formato de selección de alternativa</li>
-        <li>Cronograma de actividades</li>
+        <li>Propuesta de proyecto aprobada</li>
+        <li>Aval de la entidad/empresa</li>
+        <li>Cronograma de desarrollo</li>
+        <li>Presupuesto</li>
       </ul>
     </div>
 
@@ -38,6 +38,8 @@
         </div>
       </div>
 
+      <!-- (Se usa input file oculto y selección directa; no se muestra modal) -->
+
     <!-- Fecha estimada -->
     <div class="fecha-section q-mb-md">
       <p class="text-subtitle2 text-weight-bold">
@@ -54,7 +56,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useQuasar } from 'quasar'
 import BotonEnviar from 'src/components/BotonEnviar.vue'
 import BackButton from 'src/components/BackButton.vue'
@@ -64,42 +66,12 @@ const $q = useQuasar()
 
 // Estado del archivo
 const fileName = ref('')
-const fechaFinalizacion = ref('')
+const fechaFinalizacion = ref('') // Será calculada por el backend
 
 // Estado de subida simplificado: selección directa sin modal
 const uploadFile = ref(null)
 const saving = ref(false)
 const hiddenFileInput = ref(null)
-
-// Calcular fecha de finalización (Pasantía ONG/Entidad: 4 a 6 meses, promedio 5 meses - 640 horas mínimo)
-const calcularFechaFinalizacion = () => {
-  const fechaInicioGuardada = localStorage.getItem('registroEP_fechaConfirmada')
-  if (fechaInicioGuardada) {
-    const fecha = new Date(fechaInicioGuardada)
-    // Agregar 5 meses (promedio entre 4 y 6)
-    fecha.setMonth(fecha.getMonth() + 5)
-    
-    const dia = String(fecha.getDate()).padStart(2, '0')
-    const mes = String(fecha.getMonth() + 1).padStart(2, '0')
-    const anio = fecha.getFullYear()
-    
-    fechaFinalizacion.value = `${dia}/${mes}/${anio}`
-  } else {
-    fechaFinalizacion.value = 'No definida'
-  }
-}
-
-onMounted(() => {
-  calcularFechaFinalizacion()
-})
-
-const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
-}
 
 const triggerFileSelect = () => {
   hiddenFileInput.value?.click()
@@ -109,7 +81,7 @@ const handleHiddenFileChange = (event) => {
   const file = event.target.files?.[0]
   if (!file) return
 
-  // Validaciones similares a Empresas.vue
+  // Validaciones locales (antes de enviar al backend)
   if (file.type !== 'application/pdf') {
     $q.notify({ type: 'negative', message: 'Formato de archivo no permitido. Use PDF' })
     event.target.value = ''
@@ -124,43 +96,41 @@ const handleHiddenFileChange = (event) => {
   }
 
   uploadFile.value = file
-  // Simular el comportamiento de "Adjuntar" automático
-  attachDocument()
-  // limpiar el input para permitir re-selección del mismo archivo si se necesita
+  fileName.value = file.name
   event.target.value = ''
 }
 
-const attachDocument = async () => {
-  if (!uploadFile.value) {
-    $q.notify({ type: 'warning', message: 'Por favor selecciona un archivo PDF antes de adjuntar.' })
-    return
-  }
-
-  try {
-    saving.value = true
-    // Asignar el nombre localmente (aquí podríamos llamar al backend si es necesario)
-    fileName.value = uploadFile.value.name
-    $q.notify({ type: 'positive', message: 'Archivo adjuntado correctamente' })
-  } catch (err) {
-    $q.notify({ type: 'negative', message: 'Error al adjuntar archivo' })
-  } finally {
-    saving.value = false
-  }
-}
-
-// Acción al enviar solicitud (usa fileName que se llena desde la selección directa)
-const enviarSolicitud = () => {
+// Acción al enviar solicitud - aquí se debe llamar al backend
+const enviarSolicitud = async () => {
   if (!fileName.value) {
     $q.notify({ type: 'warning', message: 'Por favor selecciona un archivo PDF antes de enviar.' })
     return
   }
 
-  $q.notify({ type: 'positive', message: `✅ Solicitud enviada correctamente con el archivo: ${fileName.value}` })
+  try {
+    saving.value = true
+    
+    // TODO: Aquí va la llamada al backend
+    // const formData = new FormData()
+    // formData.append('archivo', uploadFile.value)
+    // formData.append('modalidad', 'proyecto_productivo')
+    // const response = await apiClient.post('/etapa-productiva/registrar', formData)
+    // fechaFinalizacion.value = response.data.fecha_finalizacion
+    
+  } catch (error) {
+    // Solo mostrar notificaciones que vengan del backend
+    const errorMessage = error?.response?.data?.message || error?.response?.data?.error
+    if (errorMessage) {
+      $q.notify({ type: 'negative', message: errorMessage })
+    }
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 
 <style scoped>
-.pasantia-wrapper {
+.proyecto-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -168,7 +138,7 @@ const enviarSolicitud = () => {
   min-height: calc(100vh - 140px);
   padding-top: 20px;
 }
-.pasantia-container {
+.proyecto-container {
   max-width: 800px;
   margin: 0 auto;
   background: white;

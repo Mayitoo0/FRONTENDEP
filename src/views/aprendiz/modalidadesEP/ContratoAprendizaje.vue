@@ -1,6 +1,8 @@
 <template>
+  <div class="contrato-wrapper">
   <div class="contrato-container q-pa-lg">
-    <div class="text-center q-mb-lg">
+  <BackButton to="/app/aprendiz/registroep" :disabled="saving" />
+    <div class="text-center q-mb-lg" >
       <h2 class="text-h5 text-weight-bold text-green-9">
         Contrato de aprendizaje
       </h2>
@@ -17,20 +19,25 @@
     </div>
 
     <!-- Subida de documento -->
-    <div class="document-section q-pa-md q-mb-lg">
-      <div class="doc-label text-weight-bold text-green-9 q-mb-sm">
-        Documento PDF requerido
+      <div class="document-section q-pa-md q-mb-lg">
+        <div class="doc-label text-weight-bold text-green-9 q-mb-sm">
+          Documento PDF requerido
+        </div>
+
+        <!-- Botón que abre directamente el selector de archivos -->
+        <div class="q-mb-md text-center">
+          <BotonIngresar label="Seleccionar archivo" @click="triggerFileSelect" icon="attach_file" />
+        </div>
+
+        <!-- input file oculto que se dispara al pulsar el botón -->
+        <input ref="hiddenFileInput" type="file" accept="application/pdf" style="display:none" @change="handleHiddenFileChange" />
+
+        <div v-if="fileName" class="text-caption q-mt-sm text-center">
+          Archivo seleccionado: <strong>{{ fileName }}</strong>
+        </div>
       </div>
-      <input
-        type="file"
-        accept="application/pdf"
-        @change="handleFileUpload"
-        class="input-file"
-      />
-      <div v-if="fileName" class="text-caption q-mt-sm">
-        Archivo seleccionado: <strong>{{ fileName }}</strong>
-      </div>
-    </div>
+
+      <!-- (Se usa input file oculto y selección directa; no se muestra modal) -->
 
     <!-- Fecha estimada -->
     <div class="fecha-section q-mb-md">
@@ -43,37 +50,95 @@
     <div class="text-right">
       <BotonEnviar label="ENVIAR SOLICITUD" @click="enviarSolicitud" />
     </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useQuasar } from 'quasar'
 import BotonEnviar from 'src/components/BotonEnviar.vue'
+import BackButton from 'src/components/BackButton.vue'
+import BotonIngresar from 'src/components/BotonIngresar.vue'
+
+const $q = useQuasar()
 
 // Estado del archivo
 const fileName = ref('')
-const fechaFinalizacion = ref('12/03/2026') 
+const fechaFinalizacion = ref('') // Será calculada por el backend
 
-// Manejar subida de archivo
-const handleFileUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    fileName.value = file.name
-  }
+// Estado de subida simplificado: selección directa sin modal
+const uploadFile = ref(null)
+const saving = ref(false)
+const hiddenFileInput = ref(null)
+
+const triggerFileSelect = () => {
+  hiddenFileInput.value?.click()
 }
 
-// Acción al enviar solicitud
-const enviarSolicitud = () => {
-  if (!fileName.value) {
-    alert('Por favor selecciona un archivo PDF antes de enviar.')
+const handleHiddenFileChange = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  // Validaciones locales (antes de enviar al backend)
+  if (file.type !== 'application/pdf') {
+    $q.notify({ type: 'negative', message: 'Formato de archivo no permitido. Use PDF' })
+    event.target.value = ''
     return
   }
 
-  alert(`✅ Solicitud enviada correctamente con el archivo: ${fileName.value}`)
+  const maxSize = 5242880 // 5MB
+  if (file.size > maxSize) {
+    $q.notify({ type: 'negative', message: 'El archivo supera el tamaño máximo permitido de 5MB' })
+    event.target.value = ''
+    return
+  }
+
+  uploadFile.value = file
+  fileName.value = file.name
+  // limpiar el input para permitir re-selección del mismo archivo si se necesita
+  event.target.value = ''
+}
+
+// Acción al enviar solicitud - aquí se debe llamar al backend
+const enviarSolicitud = async () => {
+  if (!fileName.value) {
+    $q.notify({ type: 'warning', message: 'Por favor selecciona un archivo PDF antes de enviar.' })
+    return
+  }
+
+  try {
+    saving.value = true
+    
+    // TODO: Aquí va la llamada al backend
+    // const formData = new FormData()
+    // formData.append('archivo', uploadFile.value)
+    // formData.append('modalidad', 'contrato_aprendizaje')
+    // const response = await apiClient.post('/etapa-productiva/registrar', formData)
+    // fechaFinalizacion.value = response.data.fecha_finalizacion
+    // $q.notify({ type: 'positive', message: response.data.message })
+    
+  } catch (error) {
+    // Solo mostrar notificaciones que vengan del backend
+    const errorMessage = error?.response?.data?.message || error?.response?.data?.error
+    if (errorMessage) {
+      $q.notify({ type: 'negative', message: errorMessage })
+    }
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 
 <style scoped>
+.contrato-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  min-height: calc(100vh - 140px);
+  padding-top: 20px;
+}
 .contrato-container {
   max-width: 800px;
   margin: 0 auto;

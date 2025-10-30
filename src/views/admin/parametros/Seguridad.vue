@@ -1,6 +1,6 @@
 <template>
   <div class="seguridad-container">
-    <BackButton :size="40" class="back-arrow" />
+    <BackButton/>
 
     <div class="content-wrapper">
      

@@ -43,7 +43,7 @@
           title="CORREOS" 
           subtitle="Consulta y Envío de Correos"
           imgSrc="/src/assets/SubirDocumentos_negro.jpg" 
-          route="/vista" 
+          route="/app/admin/correos" 
           color="#5db82f" 
           textColor="white" />
         <Card 

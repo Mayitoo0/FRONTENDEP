@@ -2,14 +2,7 @@
   <div class="detalle-aprendiz-page">
     <!-- Header con flecha de retroceso -->
     <div class="header">
-      <q-btn
-        flat
-        round
-        icon="arrow_back"
-        color="green-7"
-        size="sm"
-        @click="goBack"
-      />
+      <BackButton/>
     </div>
 
     <!-- Card principal -->
@@ -420,6 +413,7 @@ import modalComponent from '@/components/modals/modalComponent.vue'
 import maintable from '@/components/tables/maintable.vue'
 import BotonCerrar from '@/components/BotonCerrar.vue'
 import BotonEnviar from '@/components/BotonEnviar.vue'
+import BackButton from '../../components/BackButton.vue'
 
 const router = useRouter()
 const route = useRoute()

@@ -1,188 +1,232 @@
 <template>
   <div class="instructores-container">
+    <!-- Encabezado con botón de regreso y título -->
     <div class="header-container">
+      <!-- El botón solo aparece cuando no hay ningún modal abierto -->
+      <BackButton/>
       <header class="text-h2 text-weight-bold text-center">INSTRUCTORES</header>
     </div>
 
+    <!-- Tarjetas de estadísticas generales -->
     <div class="stats-container">
       <div class="stats-grid">
+        <!-- Recorremos el array de estadísticas para mostrar cada una -->
         <StatsCard v-for="(stat, index) in stats" :key="index" :title="stat.title" :value="stat.value"
           class="stat-card" />
       </div>
     </div>
 
-    <!-- Mostrar la tabla directamente -->
     <div>
+      <!-- Barra de búsqueda y filtros -->
       <div class="search-container">
+        <!-- Input para buscar instructores -->
         <q-input v-model="search" placeholder="Buscar instructor..." outlined dense class="search-input">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
 
-        <q-select v-model="filtroEstado" :options="opcionesEstado" label="Estado" outlined dense clearable
-          class="filter-select" emit-value map-options />
+        <!-- Select para filtrar por estado (activo/inactivo) -->
+        <q-select 
+          v-model="filtroEstado" 
+          :options="opcionesEstado" 
+          label="Estado" 
+          outlined 
+          dense 
+          clearable
+          class="filter-select" 
+          option-label="label" 
+          option-value="value"
+        />
 
-        <q-select v-model="filtroPrograma" :options="opcionesPrograma" label="Programa" outlined dense clearable
-          class="filter-select" emit-value map-options />
+        <!-- Select para filtrar por programa -->
+        <q-select 
+          v-model="filtroPrograma" 
+          :options="opcionesPrograma" 
+          label="Programa" 
+          outlined 
+          dense 
+          clearable
+          class="filter-select" 
+          option-label="label" 
+          option-value="value"
+        />
       </div>
 
-      <q-table :rows="instructoresFiltrados" :columns="columns" row-key="id" :loading="loading" flat bordered
-        :pagination="{ rowsPerPage: 10 }">
-        <template v-slot:body-cell-status="props">
-          <q-td :props="props">
+      <!-- Tabla principal con la lista de instructores -->
+      <maintable 
+        :datos="instructoresFiltrados" 
+        :columnas="columns" 
+        row-key="id"
+        @visualizar="verDetalle"
+      >
+        <!-- Slot personalizado para la columna de estado -->
+        <template #body-cell-status="props">
+          <q-td :props="props" class="text-center">
+            <!-- Badge que cambia de color según el estado -->
             <q-badge :color="getStatusColor(props.row.status)">
               {{ getStatusLabel(props.row.status) }}
             </q-badge>
           </q-td>
         </template>
 
-        <template v-slot:body-cell-acciones="props">
-          <q-td :props="props">
+        <!-- Slot para la columna de acciones -->
+        <template #body-cell-acciones="props">
+          <q-td :props="props" class="text-center">
+            <!-- Botón para ver los detalles del instructor -->
             <q-btn flat round color="primary" icon="visibility" size="sm" @click="verDetalle(props.row)">
               <q-tooltip>Ver detalles</q-tooltip>
             </q-btn>
           </q-td>
         </template>
-      </q-table>
+      </maintable>
 
-      <q-dialog v-model="mostrarDetalles" persistent>
-        <q-card class="detail-card">
-          <q-card-section class="header-section">
-            <div class="text-h6">Detalles del Instructor</div>
-            <q-space />
-            <q-btn icon="close" flat round dense v-close-popup />
-          </q-card-section>
+      <!-- Modal principal: Detalles del Instructor -->
+      <ModalComponent 
+        ref="modalDetallesRef"
+        :persistent="true"
+        width="1200px"
+        max-width="98vw"
+      >
+        <!-- Header del modal -->
+        <template #header>
+          <div class="text-h6">Perfil de Instructor</div>
+        </template>
 
-          <q-separator />
-
-          <q-card-section v-if="instructorSeleccionado" class="detail-content">
-            <div class="row q-col-gutter-md">
-              <!-- Información Personal -->
+        <!-- Cuerpo del modal con toda la información -->
+        <template #body>
+          <div v-if="instructorSeleccionado" class="q-pa-md">
+            <!-- Usamos un row de Quasar para dividir en columnas -->
+            <div class="row q-col-gutter-lg">
+              
+              <!-- ===== COLUMNA IZQUIERDA ===== -->
               <div class="col-12 col-md-6">
-                <q-card flat bordered class="detail-section">
-                  <q-card-section>
-                    <div class="text-subtitle1 text-weight-bold">Información Personal</div>
-                    <div class="q-mt-sm">
-                      <div class="text-subtitle2">Nombre Completo</div>
-                      <div>{{ instructorSeleccionado.nombre }}</div>
-                    </div>
-                    <div class="q-mt-md">
-                      <div class="text-subtitle2">Documento</div>
-                      <div>{{ instructorSeleccionado.tipoDocumento }} {{ instructorSeleccionado.numeroDocumento }}</div>
-                    </div>
-                    <div class="q-mt-md">
-                      <div class="text-subtitle2">Teléfono</div>
-                      <div>{{ instructorSeleccionado.telefono }}</div>
-                    </div>
-                  </q-card-section>
-                </q-card>
-              </div>
+                <!-- Sección: Información Personal -->
+                <div class="text-h6 q-mb-md section-title">Información Personal</div>
+                <div class="data-grid">
+                  <!-- Cada data-row muestra un campo con su valor -->
+                  <div class="data-row">
+                    <div class="text-weight-bold">Nombre:</div>
+                    <div class="data-value">{{ instructorSeleccionado.name }}</div>
+                  </div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Documento:</div>
+                    <div class="data-value">{{ instructorSeleccionado.numdocument }}</div>
+                  </div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Email:</div>
+                    <div class="data-value">{{ instructorSeleccionado.email }}</div>
+                  </div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Teléfono:</div>
+                    <div class="data-value">{{ instructorSeleccionado.phone }}</div>
+                  </div>
+                </div>
 
-              <!-- Información de Contacto -->
-              <div class="col-12 col-md-6">
-                <q-card flat bordered class="detail-section">
-                  <q-card-section>
-                    <div class="text-subtitle1 text-weight-bold">Información de Contacto</div>
-                    <div class="q-mt-sm">
-                      <div class="text-subtitle2">Email Institucional</div>
-                      <div>{{ instructorSeleccionado.email }}</div>
-                    </div>
-                    <div class="q-mt-md">
-                      <div class="text-subtitle2">Email Personal</div>
-                      <div>{{ instructorSeleccionado.emailPersonal }}</div>
-                    </div>
-                    <div class="q-mt-md">
-                      <div class="text-subtitle2">Estado</div>
+                <!-- Sección: Estado del instructor -->
+                <div class="text-h6 q-mb-md q-mt-lg section-title">Estado</div>
+                <div class="data-grid">
+                  <div class="data-row">
+                    <div class="text-weight-bold">Estado:</div>
+                    <div class="data-value">
                       <q-badge :color="getStatusColor(instructorSeleccionado.status)">
                         {{ getStatusLabel(instructorSeleccionado.status) }}
                       </q-badge>
                     </div>
-                  </q-card-section>
-                </q-card>
+                  </div>
+                </div>
               </div>
 
-              <!-- Información Académica -->
+              <!-- ===== COLUMNA DERECHA ===== -->
               <div class="col-12 col-md-6">
-                <q-card flat bordered class="detail-section">
-                  <q-card-section>
-                    <div class="text-subtitle1 text-weight-bold">Información Académica</div>
-                    <div class="q-mt-sm">
-                      <div class="text-subtitle2">Área de Conocimiento</div>
-                      <div>{{ instructorSeleccionado.conocimiento }}</div>
-                    </div>
-                    <div class="q-mt-md">
-                      <div class="text-subtitle2">Área Temática</div>
-                      <div>{{ instructorSeleccionado.areaTematica }}</div>
-                    </div>
-                  </q-card-section>
-                </q-card>
-              </div>
+                <!-- Sección: Información Académica -->
+                <div class="text-h6 q-mb-md section-title">Información Académica</div>
+                <div class="data-grid">
+                  <div class="data-row">
+                    <div class="text-weight-bold">Programa:</div>
+                    <div class="data-value">{{ instructorSeleccionado.thematicarea || '-' }}</div>
+                  </div>
+                  <div class="data-row">
+                    <div class="text-weight-bold">Aprendices Asignados:</div>
+                    <div class="data-value">{{ instructorSeleccionado.apprentices?.length || 0 }}</div>
+                  </div>
+                </div>
 
-              <!-- Información Laboral -->
-              <div class="col-12 col-md-6">
-                <q-card flat bordered class="detail-section">
-                  <q-card-section>
-                    <div class="text-subtitle1 text-weight-bold">Información Laboral</div>
-                    <div class="q-mt-sm">
-                      <div class="text-subtitle2">Tipo de Vinculación</div>
-                      <div>{{ instructorSeleccionado.tipoVinculacion || 'No especificado' }}</div>
-                    </div>
-                    <div class="q-mt-md">
-                      <div class="text-subtitle2">Capacidad de Horas</div>
-                      <div>{{ instructorSeleccionado.capacidadHoras }} horas</div>
-                    </div>
-                    <div class="q-mt-md">
-                      <div class="text-subtitle2">Horas Trabajadas</div>
-                      <div>{{ instructorSeleccionado.horasTrabajadas }} horas</div>
-                    </div>
-                  </q-card-section>
-                </q-card>
-              </div>
+                <!-- Sección: Horas de Trabajo -->
+                <div class="text-h6 q-mb-md q-mt-lg section-title">Horas de Trabajo</div>
+                <div class="data-grid">
+                  <div class="data-row">
+                    <div class="text-weight-bold">Horas Acumuladas:</div>
+                    <!-- Las horas se muestran con un estilo destacado -->
+                    <div class="data-value horas-destacadas">{{ Math.round(instructorSeleccionado.hourswork || 0) }}</div>
+                  </div>
+                </div>
 
-              <!-- Aprendices Asignados -->
-              <div class="col-12">
-                <q-card flat bordered class="detail-section">
-                  <q-card-section>
-                    <div class="text-subtitle1 text-weight-bold">Aprendices Asignados</div>
-                    <div class="q-mt-sm">
-                      <div class="text-h4">{{ instructorSeleccionado.aprendices }}</div>
-                      <div class="text-caption">Total de aprendices</div>
-                    </div>
-                  </q-card-section>
-                </q-card>
+                <!-- Sección: Input para pagar horas -->
+                <div class="text-h6 q-mb-md q-mt-lg section-title">Pagar Horas</div>
+                <q-input
+                  v-model.number="cantidadAPagar"
+                  outlined
+                  dense
+                  type="number"
+                  label="Cantidad de horas"
+                  :placeholder="(instructorSeleccionado.hourswork || 0) > 0 ? 'Ingrese cantidad a pagar' : 'Ya pagaste todas las horas'"
+                  :disable="(instructorSeleccionado.hourswork || 0) <= 0"
+                  :min="0"
+                  :max="Math.round(instructorSeleccionado.hourswork || 0)"
+                  class="q-mb-md"
+                  :rules="[
+                    val => val >= 0 || 'La cantidad debe ser positiva',
+                    val => val <= Math.round(instructorSeleccionado.hourswork || 0) || 'No puedes pagar más horas de las acumuladas'
+                  ]"
+                />
               </div>
-
-              <!-- Fechas -->
-              <div class="col-12">
-                <q-card flat bordered class="detail-section">
-                  <q-card-section>
-                    <div class="text-subtitle1 text-weight-bold">Información del Sistema</div>
-                    <div class="row q-mt-sm q-col-gutter-md">
-                      <div class="col-6">
-                        <div class="text-subtitle2">Fecha de Registro</div>
-                        <div>{{ instructorSeleccionado.fechaCreacion }}</div>
-                      </div>
-                      <div class="col-6">
-                        <div class="text-subtitle2">Última Actualización</div>
-                        <div>{{ instructorSeleccionado.fechaActualizacion }}</div>
-                      </div>
-                    </div>
-                  </q-card-section>
-                </q-card>
-              </div>
-            </div>
-          </q-card-section>
-
-          <q-separator />
-          <div class="dialog-buttons q-pa-md">
-            <div class="row justify-end buttons-row">
-              <Button1 label="Cerrar" color="grey-7" icon="close" style="width: 150px"
-                @click="mostrarDetalles = false" />
             </div>
           </div>
-        </q-card>
-      </q-dialog>
+        </template>
+
+        <!-- Footer del modal con botones de acción -->
+        <template #footer>
+          <BotonCerrar @click="cerrarModal" />
+          <!-- El botón de enviar se deshabilita si no hay una cantidad válida -->
+          <BotonEnviar 
+            @click="abrirModalConfirmacion" 
+            :disabled="!cantidadAPagar || cantidadAPagar <= 0 || cantidadAPagar > Math.round(instructorSeleccionado.hourswork || 0)" 
+          />
+        </template>
+      </ModalComponent>
+
+      <!-- Modal secundario: Confirmación de Pago -->
+      <ModalComponent 
+        ref="modalConfirmacionRef"
+        :persistent="true"
+        width="600px"
+        max-width="95vw"
+      >
+        <template #header>
+          <div class="text-h6">Confirmación de Pago</div>
+        </template>
+
+        <!-- Cuerpo con el mensaje de confirmación -->
+        <template #body>
+          <div class="q-pa-md">
+            <p class="confirmacion-text">
+              ¿Estás seguro de pagar <strong>{{ cantidadAPagar }} horas</strong> al instructor 
+              <strong>{{ instructorSeleccionado?.name }}</strong>?
+            </p>
+            <p class="confirmacion-text">
+              Quedarían <strong>{{ Math.max(0, Math.round(instructorSeleccionado.hourswork || 0) - cantidadAPagar) }} horas</strong> pendientes por pagar.
+            </p>
+          </div>
+        </template>
+
+        <!-- Footer con botones de cancelar y confirmar -->
+        <template #footer>
+          <BotonCerrar @click="cerrarModalConfirmacion" />
+          <!-- El botón muestra un loading mientras procesa el pago -->
+          <BotonEnviar @click="confirmarPago" :loading="procesandoPago" />
+        </template>
+      </ModalComponent>
     </div>
   </div>
 </template>
@@ -191,120 +235,175 @@
 import { ref, onMounted, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { apiClient } from '@/plugins/pluginAxios.js'
+import { useNotifications } from '@/composables/useNotifications'
 import BackButton from '@/components/BackButton.vue'
 import StatsCard from '@/components/cards/StatsCard.vue'
-import Button1 from '@/components/button-1.vue'
+import maintable from '@/components/tables/MainTable.vue'
+import ModalComponent from '@/components/modals/ModalComponent.vue'
+import BotonCerrar from '@/components/BotonCerrar.vue'
+import BotonEnviar from '@/components/BotonEnviar.vue'
 
+// Configuración de Quasar y notificaciones
 const $q = useQuasar()
+const notificaciones = useNotifications()
+// Si no existe el composable de notificaciones, usamos el notify de Quasar
+const showSuccess = notificaciones?.showSuccess || ((msg) => $q.notify({ type: 'positive', message: msg }))
+const showError = notificaciones?.showError || ((msg) => $q.notify({ type: 'negative', message: msg }))
 
+// Variables reactivas para el estado de la página
 const loading = ref(false)
 const error = ref(null)
+const procesandoPago = ref(false)
+
+// Array con las estadísticas que se muestran en las tarjetas superiores
 const stats = ref([
   { title: 'TOTAL INSTRUCTORES', value: 0 },
   { title: 'INSTRUCTORES ACTIVOS', value: 0 },
   { title: 'APRENDICES ASIGNADOS', value: 0 },
-  { title: 'INSTRUCTORES CONTRATO TERMINADO', value: 0 }
+  { title: 'CONTRATO TERMINADO', value: 0 }
 ])
+
+// Arrays para almacenar los datos
 const instructores = ref([])
 const aprendices = ref([])
 
+// Filtros para la búsqueda
 const filtroEstado = ref(null)
 const filtroPrograma = ref(null)
 
+// Variables para controlar los modales y la búsqueda
 const mostrarTabla = ref(false)
 const search = ref('')
 const mostrarDetalles = ref(false)
+const mostrarConfirmacion = ref(false)
 const instructorSeleccionado = ref(null)
+const cantidadAPagar = ref(0)
 
+// Referencias a los componentes de modal
+const modalDetallesRef = ref(null)
+const modalConfirmacionRef = ref(null)
+
+// Opciones para los selectores de filtro
 const opcionesEstado = ref([])
 const opcionesPrograma = ref([])
 
+// Definición de las columnas de la tabla
 const columns = [
-  { name: 'numeroDocumento', align: 'left', label: 'Cédula', field: 'numeroDocumento', sortable: true },
-  { name: 'nombre', align: 'left', label: 'Nombre', field: 'nombre', sortable: true },
+  { name: 'numdocument', align: 'left', label: 'Cédula', field: 'numdocument', sortable: true },
+  { name: 'name', align: 'left', label: 'Nombre', field: 'name', sortable: true },
   { name: 'email', align: 'left', label: 'Email', field: 'email', sortable: true },
-  { name: 'areaTematica', align: 'left', label: 'Programa', field: 'areaTematica', sortable: true },
-  { name: 'aprendices', align: 'center', label: 'Aprendices', field: 'aprendices', sortable: true },
+  { name: 'thematicarea', align: 'left', label: 'Programa', field: 'thematicarea', sortable: true },
+  { name: 'apprentices', align: 'center', label: 'Aprendices', field: row => row.apprentices?.length || 0, sortable: true },
   { name: 'status', align: 'center', label: 'Estado', field: 'status' },
   { name: 'acciones', align: 'center', label: 'Acciones', field: 'acciones' }
 ]
 
-const instructoresActivos = computed(() => instructores.value.filter(i => i.status === 1))
+// Computed para obtener solo los instructores activos
+const instructoresActivos = computed(() => {
+  const activos = []
+  for (let i = 0; i < instructores.value.length; i++) {
+    if (instructores.value[i].status === 1) {
+      activos.push(instructores.value[i])
+    }
+  }
+  return activos
+})
 
+// Computed que filtra los instructores según los criterios de búsqueda
 const instructoresFiltrados = computed(() => {
-  let resultado = instructores.value
+  let resultado = []
+  
+  for (let i = 0; i < instructores.value.length; i++) {
+    resultado.push(instructores.value[i])
+  }
 
+  // Filtro por texto de búsqueda
   if (search.value) {
     const s = search.value.toLowerCase()
-    resultado = resultado.filter(i =>
-      i.nombre.toLowerCase().includes(s) ||
-      i.numeroDocumento.toString().includes(s) ||
-      i.email.toLowerCase().includes(s) ||
-      (i.areaTematica && i.areaTematica.toLowerCase().includes(s))
-    )
+    const temp = []
+    for (let i = 0; i < resultado.length; i++) {
+      const instructor = resultado[i]
+      const name = (instructor.name || '').toLowerCase()
+      const numdocument = (instructor.numdocument || '').toString()
+      const email = (instructor.email || '').toLowerCase()
+      const thematicarea = (instructor.thematicarea || '').toLowerCase()
+      
+      if (name.includes(s) || numdocument.includes(s) || email.includes(s) || thematicarea.includes(s)) {
+        temp.push(instructor)
+      }
+    }
+    resultado = temp
   }
 
-  if (filtroEstado.value !== null) {
-    resultado = resultado.filter(i => i.status === filtroEstado.value)
+  // Filtro por estado - obtener el valor real del objeto
+  if (filtroEstado.value !== null && filtroEstado.value !== undefined) {
+    const valorEstado = typeof filtroEstado.value === 'object' ? filtroEstado.value.value : filtroEstado.value
+    const temp = []
+    for (let i = 0; i < resultado.length; i++) {
+      if (resultado[i].status === valorEstado) {
+        temp.push(resultado[i])
+      }
+    }
+    resultado = temp
   }
 
+  // Filtro por programa - obtener el valor real del objeto
   if (filtroPrograma.value) {
-    resultado = resultado.filter(i => i.areaTematica === filtroPrograma.value)
+    const valorPrograma = typeof filtroPrograma.value === 'object' ? filtroPrograma.value.value : filtroPrograma.value
+    const temp = []
+    for (let i = 0; i < resultado.length; i++) {
+      if (resultado[i].thematicarea === valorPrograma) {
+        temp.push(resultado[i])
+      }
+    }
+    resultado = temp
   }
 
   return resultado
 })
 
+// Función que carga los instructores desde el backend
 async function fetchInstructor() {
   loading.value = true
   try {
+    // Hacemos la petición al backend
     const response = await apiClient.get('/instructors/listInstructor')
     const msg = response.data?.msg
-    console.log(response);
 
-    // Compatibilidad: msg puede ser un array directo o un objeto con propiedades
+    // Extraemos el array de instructores (puede venir en diferentes formatos)
     const instructoresArray = Array.isArray(msg)
       ? msg
       : (msg?.instructores || msg?.instructors || msg?.list || [])
 
     const aprendicesArray = msg?.aprendices || msg?.apprentices || []
 
-    // Mapear respuesta a la estructura usada en la vista
-    instructores.value = instructoresArray.map(instructor => ({
-      id: instructor._id,
-      nombre: instructor.name || `${instructor.nombres || ''} ${instructor.apellidos || ''}`.trim(),
-      tipoDocumento: instructor.tpdocument,
-      numeroDocumento: instructor.numdocument,
-      emailPersonal: instructor.emailpersonal,
-      email: instructor.email,
-      telefono: instructor.phone,
-      direccion: instructor.address || '',
-      conocimiento: instructor.knowledge,
-      areaTematica: instructor.thematicarea || 'Sin programa',
-      tipoVinculacion: instructor.bindingtype || 'No especificado',
-      capacidadHoras: instructor.caphour || 0,
-      horasTrabajadas: instructor.hourswork || 0,
-      aprendices: instructor.aprendicesCount ?? 0,
-      status: instructor.status,
-      fechaCreacion: instructor.createdAt ? new Date(instructor.createdAt).toLocaleDateString() : '-',
-      fechaActualizacion: instructor.updatedAt ? new Date(instructor.updatedAt).toLocaleDateString() : '-'
-    }))
-
-    // Guardar aprendices (si es necesario en otras partes)
+    // Asignamos directamente los datos del backend
+    instructores.value = instructoresArray
     aprendices.value = Array.isArray(aprendicesArray) ? aprendicesArray : []
 
+    // Generamos las opciones para los filtros
     generarOpcionesFiltro()
 
-    const activos = instructores.value.filter(i => i.status === 1).length
-    const contratoTerminado = instructores.value.filter(i =>
-      (i.tipoVinculacion || '').toLowerCase().includes('contrato terminado')
-    ).length
+    // Calculamos las estadísticas
+    let activos = 0
+    let contratoTerminado = 0
+    
+    for (let i = 0; i < instructores.value.length; i++) {
+      if (instructores.value[i].status === 1) {
+        activos++
+      }
+      const bindingtype = instructores.value[i].bindingtype || ''
+      if (bindingtype.toLowerCase().includes('contrato terminado')) {
+        contratoTerminado++
+      }
+    }
 
+    // Actualizamos las tarjetas de estadísticas
     stats.value = [
       { title: 'TOTAL INSTRUCTORES', value: instructores.value.length },
       { title: 'INSTRUCTORES ACTIVOS', value: activos },
       { title: 'APRENDICES ASIGNADOS', value: aprendices.value.length },
-      { title: 'INSTRUCTORES CONTRATO TERMINADO', value: contratoTerminado }
+      { title: 'CONTRATO TERMINADO', value: contratoTerminado }
     ]
   } catch (err) {
     console.error('Error al cargar instructores:', err)
@@ -314,23 +413,31 @@ async function fetchInstructor() {
   }
 }
 
+// Genera las opciones para los selectores de filtro
 function generarOpcionesFiltro() {
-  const estadosUnicos = [...new Set(instructores.value.map(i => i.status))].filter(v => v !== undefined)
+  // Opciones de estado con etiquetas legibles
   opcionesEstado.value = [
     { label: 'Todos los estados', value: null },
-    ...estadosUnicos.map(v => ({
-      label: getStatusLabel(v),
-      value: v
-    }))
+    { label: 'Activo', value: 1 },
+    { label: 'Inactivo', value: 0 }
   ]
 
-  const programasUnicos = [...new Set(instructores.value.map(i => i.areaTematica).filter(Boolean))]
-  opcionesPrograma.value = [
-    { label: 'Todos los programas', value: null },
-    ...programasUnicos.map(p => ({ label: p, value: p }))
-  ]
+  // Obtenemos los programas únicos
+  const programasUnicos = []
+  for (let i = 0; i < instructores.value.length; i++) {
+    const programa = instructores.value[i].thematicarea
+    if (programa && !programasUnicos.includes(programa)) {
+      programasUnicos.push(programa)
+    }
+  }
+  
+  opcionesPrograma.value = [{ label: 'Todos los programas', value: null }]
+  for (let i = 0; i < programasUnicos.length; i++) {
+    opcionesPrograma.value.push({ label: programasUnicos[i], value: programasUnicos[i] })
+  }
 }
 
+// Convierte el número de estado en una etiqueta legible
 function getStatusLabel(status) {
   switch (status) {
     case 1: return 'Activo'
@@ -339,41 +446,159 @@ function getStatusLabel(status) {
   }
 }
 
+// Devuelve el color del badge según el estado
 function getStatusColor(status) {
   return status === 1 ? 'positive' : 'negative'
 }
 
+// Abre el modal de detalles con la información del instructor seleccionado
 function verDetalle(instructor) {
   instructorSeleccionado.value = instructor
-  mostrarDetalles.value = true
+  cantidadAPagar.value = 0
+  modalDetallesRef.value?.openDialog()
 }
 
+// Cierra el modal de detalles
+function cerrarModal() {
+  modalDetallesRef.value?.closeDialog()
+  cantidadAPagar.value = 0
+}
+
+// Valida y abre el modal de confirmación
+function abrirModalConfirmacion() {
+  const hourswork = Math.round(instructorSeleccionado.value?.hourswork || 0)
+  if (cantidadAPagar.value > 0 && cantidadAPagar.value <= hourswork) {
+    modalConfirmacionRef.value?.openDialog()
+  } else {
+    showError('Por favor ingresa una cantidad válida de horas a pagar')
+  }
+}
+
+// Cierra el modal de confirmación
+function cerrarModalConfirmacion() {
+  modalConfirmacionRef.value?.closeDialog()
+}
+
+// Procesa el pago de horas del instructor
+async function confirmarPago() {
+  if (!instructorSeleccionado.value || cantidadAPagar.value <= 0) {
+    showError('Por favor verifica la cantidad de horas a pagar')
+    return
+  }
+
+  procesandoPago.value = true
+  
+  try {
+    // Calculamos las horas que quedarían después del pago
+    const horasRestantes = Math.max(0, Math.round(instructorSeleccionado.value.hourswork || 0) - cantidadAPagar.value)
+    
+    // ===== AQUÍ VA LO DEL BACKEND=====
+    // Descomentar esto cuando se tenga el endpoint listo:
+    // const response = await apiClient.put(`/instructors/updateInstructor/${instructorSeleccionado.value._id}`, {
+    //   hourswork: horasRestantes
+    // })
+    
+    // Actualizamos los datos localmente
+    instructorSeleccionado.value.hourswork = horasRestantes
+    
+    // Buscamos el instructor en el array y lo actualizamos
+    let indiceInstructor = -1
+    for (let i = 0; i < instructores.value.length; i++) {
+      if (instructores.value[i]._id === instructorSeleccionado.value._id) {
+        indiceInstructor = i
+        break
+      }
+    }
+    
+    if (indiceInstructor !== -1) {
+      instructores.value[indiceInstructor] = {
+        ...instructores.value[indiceInstructor],
+        hourswork: horasRestantes
+      }
+    }
+    
+    // Mostramos mensaje de éxito
+    showSuccess(`Pago exitoso! Se pagaron ${cantidadAPagar.value} horas`)
+    
+    // Cerramos los modales
+    cerrarModalConfirmacion()
+    setTimeout(() => cerrarModal(), 300)
+
+  } catch (err) {
+    console.error('Error al procesar el pago:', err)
+    const mensajeError = err.response?.data?.msg || err.response?.data?.message || 'Error al procesar el pago'
+    showError(mensajeError)
+  } finally {
+    procesandoPago.value = false
+  }
+}
+
+// Cuando el componente se monta, cargamos los instructores
 onMounted(fetchInstructor)
 </script>
 
 <style scoped>
-.urgent-section {
+/* Los estilos CSS están organizados por secciones */
+
+/* ===== ESTILOS GENERALES DEL COMPONENTE ===== */
+
+/* Títulos de sección con el verde característico del SENA */
+.section-title {
+  color: #39a900;
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  padding-left: 8px;
+  border-left: 4px solid #39a900;
+}
+
+/* Grid para mostrar la información de forma organizada */
+.data-grid {
+  display: grid;
+  gap: 16px;
+  background-color: white;
+  padding: 20px;
   border-radius: 8px;
-  padding: 1.5rem;
-  margin: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Cada fila de datos tiene una etiqueta y un valor */
+.data-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 16px;
+  align-items: center;
 }
 
 .text-weight-bold {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
+  color: #2c3e50;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
-.button-wide {
-  width: 400px;
+.data-value {
+  color: #34495e;
+  font-size: 0.95rem;
 }
 
-* {
-  margin: 0;
-  padding: 0;
+/* Estilo especial para las horas trabajadas (más grande y en verde) */
+.horas-destacadas {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #39a900;
 }
 
+/* Texto de confirmación en el modal secundario */
+.confirmacion-text {
+  font-size: 16px;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  color: #333;
+}
+
+/* ===== CONTENEDOR DE ESTADÍSTICAS ===== */
 .stats-container {
-  padding: 20px;
+  padding: 20px 50px;
   width: 100%;
   margin-bottom: 40px;
   border-radius: 8px;
@@ -394,44 +619,46 @@ onMounted(fetchInstructor)
   transition: transform 0.2s ease;
 }
 
+/* Efecto hover en las tarjetas de estadísticas */
 .stat-card:hover {
   transform: translateY(-5px);
 }
 
+/* ===== CONTENEDOR PRINCIPAL ===== */
 .instructores-container {
   padding: 10px 16px 16px 16px;
 }
 
 .header-container {
-  margin-top: -20px;
+  margin-top: 20px;
   margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
 }
 
 .text-h2 {
   font-size: 3rem !important;
   letter-spacing: 1px;
+  flex: 1;
 }
 
-.urgent-cards-container {
-  margin-top: 48px;
-  padding: 24px;
-  background-color: #e3f2fd;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-}
-
+/* ===== ESTILOS DE LA TABLA ===== */
 :deep(.q-table) {
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* Encabezado de la tabla con el verde del SENA */
 :deep(.q-table th) {
   font-weight: bold;
   background: #39A900 !important;
   color: white !important;
 }
 
+/* Filas alternas con fondo gris claro para mejor lectura */
 :deep(.q-table tr:nth-child(even)) {
   background: #f9f9f9;
 }
@@ -445,12 +672,14 @@ onMounted(fetchInstructor)
   font-size: 0.8em;
 }
 
+/* ===== BARRA DE BÚSQUEDA Y FILTROS ===== */
 .search-container {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
   flex-wrap: wrap;
+  padding-left: 2.5%; 
 }
 
 .search-input {
@@ -463,68 +692,508 @@ onMounted(fetchInstructor)
   min-width: 200px;
 }
 
-.text-subtitle1 {
-  color: #1976d2;
+/* ================================================ */
+/* MEDIA QUERIES - RESPONSIVIDAD */
+/* ================================================ */
+
+/* ===== MÓVILES MUY PEQUEÑOS (300px - 400px) ===== */
+@media (min-width: 300px) and (max-width: 400px) {
+  .instructores-container {
+    padding: 6px 8px 8px 8px;
+  }
+
+  .header-container {
+    margin-top: 10px;
+    margin-bottom: 16px;
+    gap: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .text-h2 {
+    font-size: 1.5rem !important;
+    text-align: center !important;
+    width: 100%;
+  }
+
+  .stats-container {
+    padding: 10px 8px;
+    margin-bottom: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .search-container {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    gap: 8px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .search-input {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .filter-select {
+    min-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Tabla más compacta en móviles */
+  :deep(.q-table) {
+    font-size: 0.7rem;
+  }
+
+  :deep(.q-table th),
+  :deep(.q-table td) {
+    padding: 4px 6px;
+    font-size: 0.7rem;
+  }
+
+  :deep(.q-table th) {
+    font-size: 0.65rem;
+  }
+
+  /* Ocultamos las columnas menos importantes */
+  :deep(.q-table th:nth-child(3)),
+  :deep(.q-table td:nth-child(3)),
+  :deep(.q-table th:nth-child(4)),
+  :deep(.q-table td:nth-child(4)) {
+    display: none;
+  }
+
+  /* Ajustes del modal para móviles */
+  .section-title {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    padding-left: 6px;
+  }
+
+  .data-grid {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .data-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .text-weight-bold {
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+  }
+
+  .data-value {
+    font-size: 0.8rem;
+    padding-left: 8px;
+  }
+
+  .horas-destacadas {
+    font-size: 1.1rem;
+  }
+
+  .confirmacion-text {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  /* Las columnas del modal ocupan todo el ancho */
+  :deep(.col-md-6) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  :deep(.q-pa-md) {
+    padding: 8px !important;
+  }
+
+  :deep(.q-col-gutter-lg) {
+    margin: -6px;
+  }
+
+  :deep(.q-col-gutter-lg > *) {
+    padding: 6px;
+  }
+
+  :deep(.q-input),
+  :deep(.q-select) {
+    font-size: 0.85rem;
+  }
+
+  :deep(.q-btn) {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+
+  :deep(.q-badge) {
+    padding: 3px 6px;
+    font-size: 0.7em;
+  }
 }
 
-.text-subtitle2 {
-  color: #666;
-  margin-bottom: 4px;
+/* ===== MÓVILES PEQUEÑOS (401px - 600px) ===== */
+@media (min-width: 401px) and (max-width: 600px) {
+  .instructores-container {
+    padding: 7px 10px 10px 10px;
+  }
+
+  .header-container {
+    margin-top: 12px;
+    margin-bottom: 18px;
+    gap: 12px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .text-h2 {
+    font-size: 2rem !important;
+    text-align: center !important;
+    width: 100%;
+  }
+
+  .stats-container {
+    padding: 12px 15px;
+    margin-bottom: 25px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .search-container {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    gap: 10px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .search-input {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .filter-select {
+    min-width: 100% !important;
+    width: 100% !important;
+  }
+
+  :deep(.q-table) {
+    font-size: 0.8rem;
+  }
+
+  :deep(.q-table th),
+  :deep(.q-table td) {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+  }
+
+  :deep(.q-table th) {
+    font-size: 0.75rem;
+  }
+
+  /* En este rango solo ocultamos la columna de Email */
+  :deep(.q-table th:nth-child(3)),
+  :deep(.q-table td:nth-child(3)) {
+    display: none;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    padding-left: 7px;
+  }
+
+  .data-grid {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .data-row {
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+  }
+
+  .text-weight-bold {
+    font-size: 0.8rem;
+  }
+
+  .data-value {
+    font-size: 0.85rem;
+  }
+
+  .horas-destacadas {
+    font-size: 1.2rem;
+  }
+
+  .confirmacion-text {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  :deep(.col-md-6) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  :deep(.q-pa-md) {
+    padding: 10px !important;
+  }
+
+  :deep(.q-col-gutter-lg) {
+    margin: -7px;
+  }
+
+  :deep(.q-col-gutter-lg > *) {
+    padding: 7px;
+  }
+
+  :deep(.q-input),
+  :deep(.q-select) {
+    font-size: 0.9rem;
+  }
+
+  :deep(.q-badge) {
+    padding: 3px 7px;
+    font-size: 0.75em;
+  }
 }
 
-.detail-card {
-  width: 900px;
-  max-width: 90vw;
-  max-height: 90vh;
+/* ===== TABLETS (601px - 900px) ===== */
+@media (min-width: 601px) and (max-width: 900px) {
+  .instructores-container {
+    padding: 8px 12px 12px 12px;
+  }
+
+  .header-container {
+    margin-top: 15px;
+    margin-bottom: 20px;
+    gap: 15px;
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+
+  .text-h2{
+    font-size: 3rem !important;
+    text-align: center !important;
+  }
+
+  .stats-container {
+    padding: 15px 20px;
+    margin-bottom: 30px;
+  }
+
+  /* En tablets mostramos las estadísticas en 2 columnas */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .search-container {
+    padding-left: 25px;
+    padding-right: 25px;
+    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-input {
+    min-width: 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .filter-select {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  :deep(.q-table) {
+    font-size: 0.85rem;
+  }
+
+  :deep(.q-table th),
+  :deep(.q-table td) {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  :deep(.q-table th) {
+    font-size: 0.8rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+  }
+
+  .data-grid {
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .data-row {
+    grid-template-columns: 140px 1fr;
+    gap: 12px;
+  }
+
+  .text-weight-bold {
+    font-size: 0.85rem;
+  }
+
+  .data-value {
+    font-size: 0.85rem;
+  }
+
+  .horas-destacadas {
+    font-size: 1.3rem;
+  }
+
+  .confirmacion-text {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  /* En tablets las columnas del modal todavía van en vertical */
+  :deep(.col-md-6) {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  :deep(.q-pa-md) {
+    padding: 12px !important;
+  }
+
+  :deep(.q-col-gutter-lg) {
+    margin: -8px;
+  }
+
+  :deep(.q-col-gutter-lg > *) {
+    padding: 8px;
+  }
 }
 
-.header-section {
-  background: #f5f5f5;
-  padding: 12px 20px;
-}
+/* ===== PANTALLAS MEDIANAS (901px - 1000px) ===== */
+@media (min-width: 901px) and (max-width: 1000px) {
+  .instructores-container {
+    padding: 10px 16px 16px 16px;
+  }
 
-.detail-content {
-  padding: 20px;
-  overflow-y: auto;
-}
+  .header-container {
+    margin-top: 18px;
+    margin-bottom: 22px;
+    gap: 18px;
+    flex-direction: row;
+    justify-content: flex-start;
+  }
 
-.detail-section {
-  height: 100%;
-  background: #ffffff;
-}
+  .text-h2 {
+    font-size: 2.5rem !important;
+    text-align: center !important;
+  }
 
-.button-container {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
+  .stats-container {
+    padding: 18px 35px;
+    margin-bottom: 35px;
+  }
 
-.dialog-buttons {
-  background: #f5f5f5;
-  border-radius: 0 0 8px 8px;
-  padding: 16px 24px;
-}
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
 
-.buttons-row {
-  gap: 24px;
-}
+  .search-container {
+    padding-left: 25px !important;
+    padding-right: 25px !important;
+    gap: 10px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
 
-.dialog-buttons :deep(.q-btn) {
-  padding: 8px 0;
-}
+  .search-input {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
 
-.volver-container {
-  margin-top: 60px;
-}
+  .filter-select {
+    min-width: 100% !important;
+    width: 100% !important;
+  }
 
-.boton-alargado {
-  height: 38px;
-  width: 220px;
-  font-size: 15px;
-  border-radius: 8px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  :deep(.q-table) {
+    font-size: 0.9rem;
+  }
+
+  :deep(.q-table th),
+  :deep(.q-table td) {
+    padding: 7px 12px;
+    font-size: 0.9rem;
+  }
+
+  :deep(.q-table th) {
+    font-size: 0.85rem;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 18px;
+  }
+
+  .data-grid {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .data-row {
+    grid-template-columns: 160px 1fr;
+    gap: 14px;
+  }
+
+  .text-weight-bold {
+    font-size: 0.9rem;
+  }
+
+  .data-value {
+    font-size: 0.9rem;
+  }
+
+  .horas-destacadas {
+    font-size: 1.4rem;
+  }
+
+  .confirmacion-text {
+    font-size: 15px;
+    margin-bottom: 14px;
+  }
+
+  /* A partir de aquí las columnas del modal van lado a lado */
+  :deep(.col-md-6) {
+    width: 50%;
+    max-width: 50%;
+  }
+
+  :deep(.q-pa-md) {
+    padding: 14px !important;
+  }
+
+  :deep(.q-col-gutter-lg) {
+    margin: -10px;
+  }
+
+  :deep(.q-col-gutter-lg > *) {
+    padding: 10px;
+  }
 }
 </style>

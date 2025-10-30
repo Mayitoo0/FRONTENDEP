@@ -32,7 +32,7 @@ defineProps({
   },
   color: {
     type: String,
-    default: '#4CAF50'
+    default: '#39A900'
   }
 })
 </script>
@@ -63,15 +63,127 @@ defineProps({
   text-align: center;
   font-size: 2.5rem;
   font-weight: 700;
-  color: #4CAF50;
+  color: #39A900;
   margin-top: 1rem;
 }
 
 .stat-line {
   width: 100%;
   height: 5px;
-  background-color: #4CAF50;
+  background-color: #39A900;
   margin-top: 0.75rem;
   border-radius: 3px;
+}
+
+/* ============================================ */
+/* RESPONSIVIDAD 300px - 400px */
+/* ============================================ */
+@media (min-width: 300px) and (max-width: 400px) {
+  .stat-container {
+    width: 100%;
+  }
+
+  .my-card {
+    min-height: 70px;
+  }
+
+  .text-subtitle2 {
+    font-size: 0.85rem;
+    padding: 0.3rem;
+  }
+
+  .value-container {
+    font-size: 1.8rem;
+    margin-top: 0.6rem;
+  }
+
+  .stat-line {
+    height: 3px;
+    margin-top: 0.5rem;
+  }
+}
+
+/* ============================================ */
+/* RESPONSIVIDAD 401px - 600px */
+/* ============================================ */
+@media (min-width: 401px) and (max-width: 600px) {
+  .stat-container {
+    width: 100%;
+  }
+
+  .my-card {
+    min-height: 80px;
+  }
+
+  .text-subtitle2 {
+    font-size: 0.95rem;
+    padding: 0.4rem;
+  }
+
+  .value-container {
+    font-size: 2rem;
+    margin-top: 0.7rem;
+  }
+
+  .stat-line {
+    height: 4px;
+    margin-top: 0.6rem;
+  }
+}
+
+/* ============================================ */
+/* RESPONSIVIDAD 601px - 900px */
+/* ============================================ */
+@media (min-width: 601px) and (max-width: 900px) {
+  .stat-container {
+    width: 100%;
+  }
+
+  .my-card {
+    min-height: 85px;
+  }
+
+  .text-subtitle2 {
+    font-size: 1rem;
+    padding: 0.4rem;
+  }
+
+  .value-container {
+    font-size: 2.1rem;
+    margin-top: 0.8rem;
+  }
+
+  .stat-line {
+    height: 4px;
+    margin-top: 0.65rem;
+  }
+}
+
+/* ============================================ */
+/* RESPONSIVIDAD 901px - 1000px */
+/* ============================================ */
+@media (min-width: 901px) and (max-width: 1000px) {
+  .stat-container {
+    width: 100%;
+  }
+
+  .my-card {
+    min-height: 95px;
+  }
+
+  .text-subtitle2 {
+    font-size: 1.1rem;
+    padding: 0.45rem;
+  }
+
+  .value-container {
+    font-size: 2.3rem;
+    margin-top: 0.9rem;
+  }
+
+  .stat-line {
+    height: 4px;
+    margin-top: 0.7rem;
+  }
 }
 </style>

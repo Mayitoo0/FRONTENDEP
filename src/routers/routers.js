@@ -14,9 +14,9 @@ import AdminParametros from '../views/admin/Parametros.vue'
 import AdminReportes from '../views/admin/Reportes.vue'
 import AdminValidarSolicitudes from '../views/admin/ValidarSolicitudes.vue'
 import AdminAlertas from '../views/admin/parametros/Alertas.vue'
+import AdminCorreos from '../views/admin/parametros/Correos.vue'
 import AdminAlmacenamiento from '../views/admin/parametros/Almacenamiento.vue'
 import AdminHorasIntructores from '../views/admin/parametros/HorasInstructores.vue'
-import AdminParamaterosModalidades from '../views/admin/parametros/Modalidades.vue'
 import AdminProcesoFormativo from '../views/admin/parametros/ProcesoFormativo.vue'
 import AdminSeguridad from '../views/admin/parametros/Seguridad.vue'
 import AdminHorasPorInstructor from '../views/admin/reportes/HorasPorInstructor.vue'
@@ -38,7 +38,7 @@ import MonitoriaSENA from '../views/aprendiz/modalidadesEP/MonitoriaSENA.vue'
 import PasantiaONGEntidad from '../views/aprendiz/modalidadesEP/PasantiaONGEntidad.vue'
 import PasantiaPyME from '../views/aprendiz/modalidadesEP/PasantiaPyME.vue'
 import PasantiaUPFamiliar from '../views/aprendiz/modalidadesEP/PasantiaUPFamiliar.vue'
-import ProyectoProductiva from '../views/aprendiz/modalidadesEP/ProyectoProductiva.vue'
+import ProyectoProductivo from '../views/aprendiz/modalidadesEP/ProyectoProductivo.vue'
 import VinculoLaboralContractual from '../views/aprendiz/modalidadesEP/VinculoLaboralContractual.vue'
 import novedadesAdmin from "../views/admin/novedadesAdmin.vue"
 import CambiarContrasena from "../views/aprendiz/CambiarContrasena.vue"
@@ -51,6 +51,7 @@ import AdminVistaReportePorModalidad from '../views/admin/reportes/VistaReporteP
 import AdminVistaReortePorInstructor from '../views/admin/reportes/VistaReportePorInstructor.vue'
 import BuscarFicha from '../views/admin/BuscarFicha.vue'
 import VistaDocumentos from '../views/admin/VistaDocumentos.vue'
+import InstructorVistaHoras from '../views/instructor/VistaHoras.vue'
 import DetalleAprendizDocumentos from '../views/admin/DetalleAprendizDocumentos.vue'
 
 const routes = [
@@ -74,8 +75,8 @@ const routes = [
       { path: 'admin/validarsolicitudes', name: 'AdminValidarSolicitudes ', component: AdminValidarSolicitudes },
       { path: 'admin/alertas', name: 'AdminAlertas', component: AdminAlertas },
       { path: 'admin/almacenamiento', name: 'AdminAlmacenamiento', component: AdminAlmacenamiento },
+      { path: 'admin/correos', name: 'AdminCorreos', component: AdminCorreos },
       { path: 'admin/horasintructores', name: 'AdminHorasIntructores', component: AdminHorasIntructores },
-      { path: 'admin/paramaterosmodalidades', name: 'AdminParamaterosModalidades', component: AdminParamaterosModalidades },
       { path: 'admin/procesoformativo', name: 'AdminProcesoFormativo', component: AdminProcesoFormativo },
       { path: 'admin/seguridad', name: 'AdminSeguridad', component: AdminSeguridad },
       { path: 'admin/horasporinstructor', name: 'AdminHorasPorInstructor', component: AdminHorasPorInstructor },
@@ -98,7 +99,7 @@ const routes = [
       { path: 'aprendiz/modalidadesEP/pasantiaongentidad', name: 'PasantiaONGEntidad', component: PasantiaONGEntidad },
       { path: 'aprendiz/modalidadesEP/pasantiapyme', name: 'PasantiaPyME', component: PasantiaPyME },
       { path: 'aprendiz/modalidadesEP/pasantiaupfamiliar', name: 'PasantiaUPFamiliar', component: PasantiaUPFamiliar },
-      { path: 'aprendiz/modalidadesEP/proyectoproductiva', name: 'ProyectoProductiva', component: ProyectoProductiva },
+      { path: 'aprendiz/modalidadesEP/proyectoproductivo', name: 'ProyectoProductivo', component: ProyectoProductivo },
       { path: 'aprendiz/modalidadesEP/vinculolaboralcontractual', name: 'VinculoLaboralContractual', component: VinculoLaboralContractual },
       { path: 'admin/novedadesAdmin', name: 'novedadesAdmin', component: novedadesAdmin },
       { path: 'admin/plantillas', name: 'plantillas', component: plantillas },
@@ -109,6 +110,7 @@ const routes = [
       { path: 'admin/buscar-ficha', name: 'BuscarFicha', component: BuscarFicha },
       { path: 'admin/documentos/:ficha', name: 'vista-documentos', component: VistaDocumentos },
       { path: 'admin/documentos/:ficha/aprendiz/:aprendizId', name: 'detalle-aprendiz', component: DetalleAprendizDocumentos },
+      { path: 'instructor/vistahoras', name: 'InstructorVistaHoras', component: InstructorVistaHoras },
 
     ]
   }

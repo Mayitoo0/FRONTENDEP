@@ -1,6 +1,8 @@
+cardNovedades 
+
 <template>
   <div class="urgent-section q-pa-md">
-    <div class="text-weight-bold">Novedades Urgentes</div>
+
 
     <div v-if="loading" class="text-center q-pa-md">
       <SpinnerButton label="Cargando..." :loading="true" />
@@ -25,21 +27,10 @@
         </div>
   </div>
       
-  
-
-
-    <div class="row justify-center q-mt-lg">
-      <Button1
-        label="Ver todas las novedades"
-        @click="$emit('mostrar-tabla')"
-        class="button-wide"/>
-    </div>
 </template>
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
-import Button1 from '@/components/button-1.vue'
-import SpinnerButton from '@/components/SpinnerButton.vue'
 
 defineProps({
   novedades: {
@@ -59,9 +50,32 @@ defineProps({
 defineEmits(['mostrar-tabla'])
 
 function tiempoTranscurrido(fecha) {
-  const dias = Math.floor((Date.now() - new Date(fecha).getTime()) / (1000 * 60 * 60 * 24))
-  return dias <= 0 ? 'Hoy' : `Hace ${dias} días`
+  const [dia, mes, anio] = fecha.split('/')
+  const fechaFormateada = `${mes}/${dia}/${anio}`
+  const dias = getDays(fechaFormateada)
+
+  if (dias < 0) return `Faltan ${Math.abs(dias)} días`
+  if (dias === 0) return 'Hoy'
+  if (dias === 1) return 'Hace 1 día'
+  return `Hace ${dias} días`
 }
+
+function getDays(fecha) {
+  const fechaNovedad = new Date(fecha)
+  const hoy = new Date()
+  
+  // Establecer las horas a medianoche para ambas fechas
+  fechaNovedad.setHours(0, 0, 0, 0)
+  hoy.setHours(0, 0, 0, 0)
+  
+  // Convertir a UTC para evitar problemas con zona horaria
+  const utcNovedad = Date.UTC(fechaNovedad.getFullYear(), fechaNovedad.getMonth(), fechaNovedad.getDate())
+  const utcHoy = Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())
+  
+  // Calcular la diferencia en días
+  return Math.floor((utcHoy - utcNovedad) / (1000 * 60 * 60 * 24))
+}
+
 </script>
 
 <style scoped>

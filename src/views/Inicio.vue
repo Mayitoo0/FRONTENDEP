@@ -71,7 +71,7 @@
           title="Informe Personal" 
           subtitle="Consultar mi informacion y Horas"
           imgSrc="/src/assets/información_personal.jpg" 
-          route="/vista" 
+          route="instructor/informepersonal" 
           color="#5db82f" 
           textColor="white" />
         <Card 
@@ -79,7 +79,7 @@
           title="Seguimientos" 
           subtitle="Proceso de documentos de seguimiento"
           imgSrc="/src/assets/SubirDocumentos_negro.jpg" 
-          route="/vista" 
+          route="instructor/seguimientos" 
           color="#5db82f" 
           textColor="white" />
         <Card 
@@ -111,7 +111,7 @@
           title="Novedades" 
           subtitle="Procesos Disciplinarios"
           imgSrc="/src/assets/Proyecto_Productivo.jpg" 
-          route="/vista" 
+          route="instructor/novedades" 
           color="#5db82f" 
           textColor="white" />
 
